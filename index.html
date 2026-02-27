@@ -24,10 +24,10 @@
         button { width: 100%; padding: 13px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         button:hover { background-color: #1d4ed8; }
         
-        /* �s�i��˦� */
+        /* 廣告位樣式 */
         .ad-slot { background: #f1f5f9; border-radius: 8px; margin: 20px 0; text-align: center; min-height: 100px; padding: 10px; border: 1px dashed #cbd5e1; color: #94a3b8; font-size: 12px; }
         
-        /* �Ϫ��˦� */
+        /* 圖表樣式 */
         #chart-container { margin-top: 20px; display: none; }
         svg { background: #f1f5f9; border-radius: 8px; width: 100%; height: 180px; }
         
@@ -108,32 +108,56 @@
             resultDiv.innerHTML = `P/L: $${totalPL.toFixed(2)}`;
             resultDiv.className = totalPL >= 0 ? 'pos' : 'neg';
 
-            // ø�s�Ϫ�
+            // 繪製圖表
             chartContainer.style.display = 'block';
             drawChart(type, strike, premium, target);
         }
 
-        function drawChart(type, strike, premium, target) {
-            const svg = document.getElementById('pl-chart');
-            const width = 400;
-            const height = 200;
-            const midY = height / 2;
-            
-            // ²�Ƨ����ഫ�GStrike Price �M�g�줤��X�b
-            const strikeX = width / 2;
-            const breakEvenPrice = type === 'call' ? strike + premium : strike - premium;
-            const breakEvenX = width / 2 + (breakEvenPrice - strike) * 10; // ²���Ҥ�
+function drawChart(type, strike, premium, target) {
+    const svg = document.getElementById('pl-chart');
+    const width = 400;
+    const height = 200;
+    const midY = height / 2;
+    
+    // 1. 定義圖表的價格範圍（自動根據 Strike 縮放）
+    const priceRange = strike * 0.4; // 顯示 Strike 上下 40% 的範圍
+    const minPrice = strike - priceRange;
+    const maxPrice = strike + priceRange;
+    
+    // 2. 將價格轉換為 SVG X 坐標的函數
+    const getX = (price) => {
+        return ((price - minPrice) / (maxPrice - minPrice)) * width;
+    };
+    
+    // 3. 將盈虧金額轉換為 SVG Y 坐標的函數 (需要定義盈虧範圍)
+    const maxPL = premium * 100 * 3; // 假設最大顯示盈虧為權利金的 3 倍
+    const getY = (pl) => {
+        return midY - (pl / maxPL) * (height / 2);
+    };
 
-            svg.innerHTML = `
-                <line x1="0" y1="${midY}" x2="${width}" y2="${midY}" stroke="#94a3b8" stroke-width="2" />
-                
-                <path d="M 0 ${type === 'call' ? height - premium*10 : premium*10} L ${strikeX} ${midY} L ${width} ${type === 'call' ? 0 : height}" 
-                      fill="none" stroke="${totalPL >= 0 ? '#16a34a' : '#dc2626'}" stroke-width="3" />
-                
-                <line x1="${strikeX}" y1="0" x2="${strikeX}" y2="${height}" stroke="#cbd5e1" stroke-dasharray="5,5" />
-                <text x="${strikeX}" y="15" text-anchor="middle" font-size="12" fill="#64748b">Strike: $${strike}</text>
-            `;
-        }
+    // 4. 計算關鍵點 (盈虧平衡點)
+    const breakEvenPrice = type === 'call' ? strike + premium : strike - premium;
+    
+    // 5. 繪製圖表
+    let pathData = "";
+    if (type === 'call') {
+        // Call: 左邊水平低，到Strike點上升
+        pathData = `M 0 ${getY(-premium * 100)} L ${getX(strike)} ${getY(-premium * 100)} L ${getX(maxPrice)} ${getY((maxPrice - strike - premium) * 100)}`;
+    } else {
+        // Put: 左邊高，到Strike點下降，右邊水平
+        pathData = `M 0 ${getY((strike - minPrice - premium) * 100)} L ${getX(strike)} ${getY(-premium * 100)} L ${getX(maxPrice)} ${getY(-premium * 100)}`;
+    }
+
+    svg.innerHTML = `
+        <line x1="0" y1="${midY}" x2="${width}" y2="${midY}" stroke="#94a3b8" stroke-width="1" />
+        
+        <path d="${pathData}" fill="none" stroke="${totalPL >= 0 ? '#16a34a' : '#dc2626'}" stroke-width="3" />
+        
+        <line x1="${getX(strike)}" y1="0" x2="${getX(strike)}" y2="${height}" stroke="#cbd5e1" stroke-dasharray="4,4" />
+        <text x="${getX(strike)}" y="15" text-anchor="middle" font-size="10" fill="#64748b">Strike: $${strike}</text>
+    `;
+}
     </script>
 </body>
+
 </html>
