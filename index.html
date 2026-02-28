@@ -3,157 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Profit Calculator | 2026 Visual Strategy Lab</title>
+    <meta name="description" content="Instant options risk/reward analysis. Calculate Max Risk, Max Profit, and Probabilities for Iron Condors, Spreads, and more.">
     
-    <!-- 美國市場 SEO 核心標籤 -->
-    <title>Options Profit Calculator | Visual Strategy Simulator 2026</title>
-    <meta name="description" content="Free real-time options profit calculator. Visualize P/L charts for Iron Condors, Butterfly Spreads, and more. Calculate max risk, reward, and break-even points instantly.">
-    <meta name="keywords" content="options profit calculator, options strategy visualizer, iron condor simulator, butterfly spread p/l, option trading tools 2026">
-    <meta name="author" content="YourProjectName">
-    <link rel="canonical" href="https://yourusername.github.io" />
-
-    <!-- Open Graph for US Social Media (X/Twitter, LinkedIn, Reddit) -->
-    <meta property="og:title" content="Visual Options Strategy Profit Calculator">
-    <meta property="og:description" content="Simulate complex option strategies with interactive P/L charts. Get instant max risk/reward data.">
-    <meta property="og:type" content="website">
-    <meta name="twitter:card" content="summary_large_image">
-
-    <!-- Schema.org JSON-LD (美國 Google 最看重的結構化資料) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Professional Options Strategy Simulator",
-      "operatingSystem": "Web",
-      "applicationCategory": "FinanceApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "Interactive P/L Charts",
-        "Iron Condor & Butterfly Logic",
-        "Max Risk/Reward Calculation",
-        "Multi-language support"
-      ]
-    }
-    </script>
-
     <style>
-        :root { --bg: #f8fafc; --card: #ffffff; --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --danger: #ef4444; --text: #0f172a; --warning: #f59e0b; }
-        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; margin: 0; }
-        .container { background: var(--card); padding: 28px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); width: 100%; max-width: 520px; }
+        :root { --bg: #f8fafc; --card: #ffffff; --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --text: #0f172a; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; margin: 0; }
+        .container { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); width: 100%; max-width: 520px; }
         
-        .lang-switch { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 12px; }
-        .lang-btn { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; color: var(--secondary); transition: 0.2s; }
-        .lang-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        /* 語系切換 */
+        .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 15px; }
+        .lang-btn { background: #f1f5f9; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--secondary); }
+        .lang-btn.active { background: var(--primary); color: white; }
 
+        /* 廣告位 */
         .ad-slot { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; margin: 15px 0; text-align: center; color: #94a3b8; font-size: 11px; display: flex; align-items: center; justify-content: center; min-height: 90px; }
 
-        h1 { text-align: center; margin: 0; font-size: 24px; letter-spacing: -0.5px; color: var(--primary); }
+        h1 { text-align: center; margin: 0; font-size: 24px; color: var(--primary); letter-spacing: -0.5px; }
         .subtitle { text-align: center; font-size: 14px; color: var(--secondary); margin-bottom: 20px; }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px; }
-        label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 5px; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; background: #fff; transition: border 0.2s; }
-        input:focus { border-color: var(--primary); outline: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        
+        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
 
-        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.25); transition: 0.2s; }
-        button#calcBtn:hover { transform: translateY(-1px); background: #1d4ed8; }
-
-        /* Data Insights Panel */
-        #summary-panel { margin-top: 20px; padding: 18px; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
-        .summary-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
-        .summary-label { font-weight: 600; color: var(--secondary); }
+        /* 2026 風險標籤面板 */
+        #risk-panel { margin-top: 20px; padding: 18px; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; display: none; }
+        .risk-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .risk-item:last-child { border: none; }
+        .risk-label { font-weight: 600; color: var(--secondary); }
         .val-p { color: var(--success); font-weight: 800; }
         .val-l { color: var(--danger); font-weight: 800; }
-        .val-b { color: var(--warning); font-weight: 800; }
+        .val-prob { background: #eff6ff; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
 
-        #result-display { margin-top: 15px; padding: 15px; border-radius: 10px; text-align: center; font-weight: 900; font-size: 22px; display: none; }
+        #result-display { margin-top: 15px; padding: 15px; border-radius: 10px; text-align: center; font-weight: 800; font-size: 22px; display: none; }
         .pos { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
         .neg { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
 
-        #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; height: 280px; }
+        #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; height: 260px; }
         svg { width: 100%; height: 100%; display: block; }
-        
-        article { font-size: 13px; color: #64748b; line-height: 1.6; margin-top: 25px; padding: 15px; border-top: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="lang-switch">
-        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">English</button>
-        <button class="lang-btn" id="btn-zh" onclick="setLanguage('zh')">繁體中文</button>
+        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" id="btn-zh" onclick="setLanguage('zh')">中文</button>
     </div>
 
     <h1 id="ui-title">Options Profit Calculator</h1>
-    <p class="subtitle" id="ui-subtitle">Professional Visual Trading Simulator</p>
+    <p class="subtitle" id="ui-subtitle">Visual Risk & Reward Analyzer</p>
 
-    <div class="ad-slot">Google AdSense - Display Header</div>
+    <div class="ad-slot">Google AdSense - Header Ad</div>
 
     <div style="margin-bottom:15px">
-        <label id="ui-strategy-label">Strategy Configuration</label>
+        <label id="ui-strategy-label">Strategy</label>
         <select id="strategySelect" onchange="updateFields()"></select>
     </div>
 
     <div class="grid">
-        <div><label id="ui-s1">Strike 1 (Min)</label><input type="number" id="s1" value="100"></div>
+        <div><label id="ui-s1">Strike 1 (Low)</label><input type="number" id="s1" value="100"></div>
         <div id="boxS2" style="display:none;"><label id="ui-s2">Strike 2</label><input type="number" id="s2" value="110"></div>
         <div id="boxS3" style="display:none;"><label id="ui-s3">Strike 3</label><input type="number" id="s3" value="120"></div>
-        <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4 (Max)</label><input type="number" id="s4" value="130"></div>
-        <div><label id="ui-premium">Total Premium Cost ($)</label><input type="number" id="premium" value="5"></div>
-        <div><label id="ui-target">Price Target ($)</label><input type="number" id="target" value="105"></div>
+        <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4 (High)</label><input type="number" id="s4" value="130"></div>
+        <div><label id="ui-premium">Total Premium ($)</label><input type="number" id="premium" value="5"></div>
+        <div><label id="ui-target">Target Price ($)</label><input type="number" id="target" value="115"></div>
     </div>
 
-    <button id="calcBtn" onclick="runCalculation()">Analyze Risk & Reward</button>
+    <button id="calcBtn" onclick="runCalculation()">Get Risk Analysis</button>
 
-    <div id="summary-panel">
-        <div class="summary-item"><span class="summary-label" id="ui-max-profit">Max Potential Profit</span><span id="res-max-profit" class="val-p">--</span></div>
-        <div class="summary-item"><span class="summary-label" id="ui-max-loss">Max Potential Risk</span><span id="res-max-loss" class="val-l">--</span></div>
-        <div class="summary-item"><span class="summary-label" id="ui-bep-label">Break-Even Point(s)</span><span id="res-bep" class="val-b">--</span></div>
+    <!-- 新增：2026 一鍵得知風險面板 -->
+    <div id="risk-panel">
+        <div class="risk-item">
+            <span class="risk-label" id="ui-max-profit">Max Reward</span>
+            <span id="res-max-profit" class="val-p">--</span>
+        </div>
+        <div class="risk-item">
+            <span class="risk-label" id="ui-max-loss">Max Risk</span>
+            <span id="res-max-loss" class="val-l">--</span>
+        </div>
+        <div class="risk-item">
+            <span class="risk-label" id="ui-prob-label">Win Probability Hint</span>
+            <span id="res-prob" class="val-prob">--</span>
+        </div>
     </div>
 
     <div id="result-display"></div>
 
     <div id="chart-wrapper">
-        <svg id="mainChart" viewBox="0 0 400 280"></svg>
+        <svg id="mainChart" viewBox="0 0 400 240"></svg>
     </div>
 
-    <article id="ui-seo-content">
-        <h3>How to Calculate Option Profit?</h3>
-        <p>Using a visual options simulator allows you to understand the risk-reward profile of complex trades like Iron Condors or Vertical Spreads. Simply enter your strike prices and net premium to see your probability of profit at expiration.</p>
-    </article>
-
-    <div class="ad-slot" style="min-height:150px">Google AdSense - In-Feed / Square</div>
+    <div class="ad-slot" style="min-height:120px">Google AdSense - Footer Ad</div>
 </div>
 
 <script>
-/**
- * 語系與 SEO 內容字典
- */
 const i18n = {
     en: {
-        title: "Options Profit Calculator", subtitle: "Professional Visual Trading Simulator",
-        strategy: "Strategy Configuration", calc: "Analyze Risk & Reward",
-        s1: "Strike 1 (Min)", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4 (Max)",
-        premium: "Total Premium ($)", target: "Price Target ($)", res: "Est. Net P/L: ",
-        profit: "PROFIT", loss: "LOSS", bep: "BEP",
-        maxProfit: "Max Potential Profit", maxLoss: "Max Potential Risk", breakEven: "Break-Even Point(s)",
-        unlimited: "Unlimited",
-        article: "<h3>Visualizing Option P/L Charts</h3><p>Understanding the payoff diagram is crucial for risk management. This tool helps you identify the max loss and profit zones for 10+ popular options strategies instantly.</p>",
-        opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Long Straddle", strangle: "Long Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
+        title: "Options Profit Calculator", subtitle: "Visual Risk & Reward Analyzer",
+        strategy: "Strategy", calc: "Get Risk Analysis",
+        s1: "Strike 1 (Low)", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4 (High)",
+        premium: "Total Premium ($)", target: "Target Price ($)", res: "Est. P/L: ",
+        profit: "PROFIT", loss: "LOSS", maxProfit: "Max Reward", maxLoss: "Max Risk",
+        probLabel: "Probability Hint", unlimited: "Unlimited",
+        probHigh: "High Probability / Low Reward", probLow: "Low Probability / High Reward", probNeutral: "Balanced Probability",
+        opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
     },
     zh: {
-        title: "期權損益模擬器", subtitle: "交易者的視覺化分析工具",
-        strategy: "策略參數設定", calc: "分析風險與收益",
-        s1: "履約價 1 (最低)", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4 (最高)",
-        premium: "淨權利金 ($)", target: "結算目標價 ($)", res: "預估淨損益: ",
-        profit: "獲利區", loss: "虧損區", bep: "平衡點",
-        maxProfit: "最大潛在獲利", maxLoss: "最大潛在風險", breakEven: "盈虧平衡點",
-        unlimited: "無限",
-        article: "<h3>為什麼需要損益圖表？</h3><p>期權交易並非線性的。透過視覺化工具，您可以清楚看到鐵鷹策略或蝴蝶價差在不同價格點的表現，從而更有效地管理交易風險。</p>",
-        opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市價差", bear_put: "熊市價差", straddle: "跨式組合 (Straddle)", strangle: "勒式組合 (Strangle)", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
+        title: "期權損益模擬器", subtitle: "視覺化風險回報分析",
+        strategy: "交易策略", calc: "一鍵分析風險",
+        s1: "履約價 1 (低)", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4 (高)",
+        premium: "淨權利金 ($)", target: "目標價格 ($)", res: "預計損益: ",
+        profit: "獲利區", loss: "虧損區", maxProfit: "最大獲利", maxLoss: "最大風險",
+        probLabel: "勝率特性提示", unlimited: "理論無限",
+        probHigh: "高勝率 / 低回報 (賣方特性)", probLow: "低勝率 / 高回報 (買方特性)", probNeutral: "勝率中性 (波動率策略)",
+        opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市價差", bear_put: "熊市價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
     }
 };
 
@@ -175,8 +141,7 @@ function setLanguage(lang) {
     document.getElementById('ui-target').innerText = i18n[lang].target;
     document.getElementById('ui-max-profit').innerText = i18n[lang].maxProfit;
     document.getElementById('ui-max-loss').innerText = i18n[lang].maxLoss;
-    document.getElementById('ui-bep-label').innerText = i18n[lang].breakEven;
-    document.getElementById('ui-seo-content').innerHTML = i18n[lang].article;
+    document.getElementById('ui-prob-label').innerText = i18n[lang].probLabel;
 
     const select = document.getElementById('strategySelect');
     const val = select.value || 'long_call';
@@ -202,8 +167,8 @@ function runCalculation() {
     const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
     const prem = parseFloat(document.getElementById('premium').value), tgt = parseFloat(document.getElementById('target').value);
 
-    // 核心損益邏輯 (Per share)
-    const calc = (p) => {
+    // 損益邏輯
+    const getP = (p) => {
         switch(strategy) {
             case 'long_call': return Math.max(0, p - v1) - prem;
             case 'short_call': return prem - Math.max(0, p - v1);
@@ -219,49 +184,51 @@ function runCalculation() {
         }
     };
 
-    // 數據面板邏輯
-    let maxP = 0, maxL = 0, beps = [];
+    // 2026 一鍵得知風險邏輯
+    let mP = 0, mL = 0, prob = "";
     const inf = i18n[currentLang].unlimited;
+    const lang = i18n[currentLang];
+
     switch(strategy) {
-        case 'long_call': maxP = inf; maxL = prem * 100; beps = [v1 + prem]; break;
-        case 'short_call': maxP = prem * 100; maxL = inf; beps = [v1 + prem]; break;
-        case 'long_put': maxP = (v1 - prem) * 100; maxL = prem * 100; beps = [v1 - prem]; break;
-        case 'short_put': maxP = prem * 100; maxL = (v1 - prem) * 100; beps = [v1 - prem]; break;
-        case 'bull_call': maxP = (v2 - v1 - prem) * 100; maxL = prem * 100; beps = [v1 + prem]; break;
-        case 'bear_put': maxP = (v2 - v1 - prem) * 100; maxL = prem * 100; beps = [v2 - prem]; break;
-        case 'straddle': maxP = inf; maxL = prem * 100; beps = [v1 - prem, v1 + prem]; break;
-        case 'strangle': maxP = inf; maxL = prem * 100; beps = [v1 - prem, v2 + prem]; break;
-        case 'butterfly': maxP = (v2 - v1 - prem) * 100; maxL = prem * 100; beps = [v1 + prem, v3 - prem]; break;
-        case 'iron_condor': maxP = prem * 100; maxL = (Math.max(v2-v1, v4-v3) - prem) * 100; beps = [v2 - prem, v3 + prem]; break;
+        case 'long_call': mP = inf; mL = prem * 100; prob = lang.probLow; break;
+        case 'short_call': mP = prem * 100; mL = inf; prob = lang.probHigh; break;
+        case 'long_put': mP = (v1 - prem) * 100; mL = prem * 100; prob = lang.probLow; break;
+        case 'short_put': mP = prem * 100; mL = (v1 - prem) * 100; prob = lang.probHigh; break;
+        case 'bull_call': mP = (v2 - v1 - prem) * 100; mL = prem * 100; prob = lang.probNeutral; break;
+        case 'bear_put': mP = (v2 - v1 - prem) * 100; mL = prem * 100; prob = lang.probNeutral; break;
+        case 'straddle': mP = inf; mL = prem * 100; prob = lang.probLow; break;
+        case 'strangle': mP = inf; mL = prem * 100; prob = lang.probLow; break;
+        case 'butterfly': mP = (v2 - v1 - prem) * 100; mL = prem * 100; prob = lang.probLow; break;
+        case 'iron_condor': mP = prem * 100; mL = (Math.max(v2-v1, v4-v3) - prem) * 100; prob = lang.probHigh; break;
     }
 
-    document.getElementById('summary-panel').style.display = 'block';
-    document.getElementById('res-max-profit').innerText = isNaN(maxP) ? maxP : `$${maxP.toFixed(2)}`;
-    document.getElementById('res-max-loss').innerText = isNaN(maxL) ? maxL : `$${maxL.toFixed(2)}`;
-    document.getElementById('res-bep').innerText = beps.map(b => `$${b.toFixed(2)}`).join(' / ');
+    document.getElementById('risk-panel').style.display = 'block';
+    document.getElementById('res-max-profit').innerText = isNaN(mP) ? mP : `$${mP.toFixed(2)}`;
+    document.getElementById('res-max-loss').innerText = isNaN(mL) ? mL : `$${mL.toFixed(2)}`;
+    document.getElementById('res-prob').innerText = prob;
 
-    const totalPL = calc(tgt) * 100;
+    const finalPL = getP(tgt) * 100;
     const resDiv = document.getElementById('result-display');
     resDiv.style.display = 'block';
-    resDiv.className = totalPL >= 0 ? 'pos' : 'neg';
-    resDiv.innerText = `${i18n[currentLang].res} $${totalPL.toFixed(2)}`;
+    resDiv.className = finalPL >= 0 ? 'pos' : 'neg';
+    resDiv.innerText = `${lang.res} $${finalPL.toFixed(2)}`;
 
-    // 繪製 SVG
-    const xMin = v1 * 0.5, xMax = (v4 || v3 || v2 || v1) * 1.5;
+    // 繪圖
+    const xMin = v1 * 0.6, xMax = (v4 || v3 || v2 || v1) * 1.4;
     let pts = [];
     for(let i=0; i<=100; i++) {
-        let x = xMin + (i * (xMax - xMin) / 100);
-        pts.push({x: x, y: calc(x)});
+        let px = xMin + (i * (xMax - xMin) / 100);
+        pts.push({x: px, y: getP(px)});
     }
-    drawSVG(pts, xMin, xMax, tgt, beps);
+    drawSVG(pts, xMin, xMax, tgt);
 }
 
-function drawSVG(pts, xMin, xMax, tgt, beps) {
+function drawSVG(pts, xMin, xMax, tgt) {
     const svg = document.getElementById('mainChart');
-    const W = 400, H = 280, MID = H / 2;
+    const W = 400, H = 240, MID = H / 2;
     const getX = (x) => ((x - xMin) / (xMax - xMin)) * W;
     const maxY = Math.max(...pts.map(p => Math.abs(p.y))) * 1.5 || 1;
-    const getY = (y) => MID - (y / maxY) * (H / 3);
+    const getY = (y) => MID - (y / maxY) * (H / 2.8);
 
     let d = `M ${getX(pts[0].x)} ${getY(pts[0].y)}`;
     pts.forEach(p => d += ` L ${getX(p.x)} ${getY(p.y)}`);
@@ -272,14 +239,12 @@ function drawSVG(pts, xMin, xMax, tgt, beps) {
         <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#94a3b8" />
         <path d="${d}" fill="none" stroke="var(--primary)" stroke-width="3" />
         <line x1="${getX(tgt)}" y1="0" x2="${getX(tgt)}" y2="${H}" stroke="#000" stroke-dasharray="4" />
-        ${beps.map(b => `<circle cx="${getX(b)}" cy="${MID}" r="4" fill="var(--warning)" />`).join('')}
-        <text x="10" y="25" font-size="11" font-weight="bold" fill="var(--success)">${i18n[currentLang].profit}</text>
-        <text x="10" y="${H-15}" font-size="11" font-weight="bold" fill="var(--danger)">${i18n[currentLang].loss}</text>
+        <text x="10" y="20" font-size="10" font-weight="bold" fill="var(--success)">${i18n[currentLang].profit}</text>
+        <text x="10" y="${H-10}" font-size="10" font-weight="bold" fill="var(--danger)">${i18n[currentLang].loss}</text>
     `;
 }
 
 setLanguage('en');
 </script>
-
 </body>
 </html>
