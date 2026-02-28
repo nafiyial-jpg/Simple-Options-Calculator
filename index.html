@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Profit Calculator | Visual Strategy & Risk Simulator</title>
-    <meta name="description" content="Free visual options calculator. Simulate Max Risk, Reward, and Break-even points for Iron Condor, Butterfly, and Spreads.">
+    <title>Options Profit Calculator | Visual Strategy Analysis 2026</title>
+    <!-- SEO & Metadata -->
+    <meta name="description" content="Visual options strategy simulator for 2026. Calculate Max Risk, Reward, and Win Probability for Iron Condors and Spreads.">
     
     <style>
         :root { --bg: #f8fafc; --card: #ffffff; --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --text: #0f172a; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; justify-content: center; margin: 0; }
         .container { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); width: 100%; max-width: 540px; }
         
-        /* 語言切換 */
         .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
-        .lang-btn { background: #f1f5f9; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; }
+        .lang-btn { background: #f1f5f9; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; transition: 0.2s; }
         .lang-btn.active { background: var(--primary); color: white; }
 
         .ad-slot { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; margin: 12px 0; text-align: center; color: #94a3b8; font-size: 11px; display: flex; align-items: center; justify-content: center; min-height: 80px; }
@@ -23,15 +23,17 @@
         label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
         input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         
-        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 15px rgba(37,99,235,0.2); }
+        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        button#calcBtn:hover { background: #1d4ed8; }
 
-        /* 數據摘要卡片 */
-        #summary-cards { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; display: none; }
+        /* 2026 一鍵得知風險卡片 */
+        #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; display: none; }
         .data-card { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
-        .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 5px; }
+        .full-card { grid-column: span 2; }
+        .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 5px; text-transform: uppercase; }
         .data-val { font-size: 16px; font-weight: 800; }
+        .prob-tag { background: #eff6ff; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-size: 12px; display: inline-block; margin-top: 5px; }
 
-        /* SVG 容器 */
         #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; height: 320px; }
         svg { width: 100%; height: 100%; display: block; }
     </style>
@@ -44,9 +46,9 @@
         <button class="lang-btn" id="btn-zh" onclick="setLanguage('zh')">中文</button>
     </div>
 
-    <h1 id="ui-title">Options Strategy Simulator</h1>
+    <h1 id="ui-title">Options Strategy Lab</h1>
 
-    <div class="ad-slot">Google AdSense - Header</div>
+    <div class="ad-slot">Google AdSense Header</div>
 
     <div>
         <label id="ui-strategy-label">Strategy</label>
@@ -62,35 +64,56 @@
         <div><label id="ui-target">Target Price ($)</label><input type="number" id="target" value="115"></div>
     </div>
 
-    <button id="calcBtn" onclick="runCalculation()">Analyze & Label Chart</button>
+    <button id="calcBtn" onclick="runCalculation()">Analyze Strategy</button>
 
-    <!-- 一鍵得知風險數據卡片 -->
-    <div id="summary-cards">
-        <div class="data-card"><span class="data-label" id="ui-max-profit">Max Reward</span><span id="res-max-profit" style="color:var(--success)" class="data-val">--</span></div>
-        <div class="data-card"><span class="data-label" id="ui-max-loss">Max Risk</span><span id="res-max-loss" style="color:var(--danger)" class="data-val">--</span></div>
+    <!-- 一鍵得知風險卡片面板 -->
+    <div id="summary-panel">
+        <div class="data-card">
+            <span class="data-label" id="ui-max-reward-label">Max Reward</span>
+            <span id="res-max-profit" class="data-val" style="color:var(--success)">--</span>
+        </div>
+        <div class="data-card">
+            <span class="data-label" id="ui-max-risk-label">Max Risk</span>
+            <span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span>
+        </div>
+        <div class="data-card full-card">
+            <span class="data-label" id="ui-prob-label">Win Probability Hint</span>
+            <div id="res-prob" class="prob-tag">--</div>
+        </div>
     </div>
 
     <div id="chart-wrapper">
         <svg id="mainChart" viewBox="0 0 400 320"></svg>
     </div>
 
-    <div class="ad-slot" style="min-height: 150px;">Google AdSense - Bottom</div>
+    <div class="ad-slot" style="min-height: 120px;">Google AdSense Footer</div>
 </div>
 
 <script>
+/**
+ * 完整語系字典
+ */
 const i18n = {
     en: {
-        title: "Strategy Simulator", strategy: "Strategy", calc: "Analyze & Label Chart",
+        title: "Strategy Simulator", strategy: "Strategy", calc: "Analyze Strategy",
         s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4",
         premium: "Total Premium", target: "Target Price",
-        maxProfit: "Max Reward", maxLoss: "Max Risk", profit: "PROFIT", loss: "LOSS", bep: "BEP", unlimited: "Unlimited",
+        maxReward: "Max Reward", maxRisk: "Max Risk", prob: "Probability Hint",
+        profit: "PROFIT", loss: "LOSS", bep: "BEP", unlimited: "Unlimited",
+        probHigh: "High Win Rate / Low Reward (Seller)", 
+        probLow: "Low Win Rate / High Reward (Buyer)", 
+        probMid: "Neutral Probability",
         opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
     },
     zh: {
-        title: "期權損益模擬器", strategy: "策略選擇", calc: "執行分析並標記圖表",
+        title: "期權策略模擬器", strategy: "選擇策略", calc: "一鍵分析風險",
         s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4",
-        premium: "淨權利金", target: "目標結算價",
-        maxProfit: "最大獲利", maxLoss: "最大風險", profit: "獲利區", loss: "虧損區", bep: "平衡點", unlimited: "理論無限",
+        premium: "淨權利金", target: "預計目標價",
+        maxReward: "最大獲利", maxRisk: "最大風險", prob: "勝率特性提示",
+        profit: "獲利區", loss: "虧損區", bep: "平衡點", unlimited: "理論無限",
+        probHigh: "高勝率 / 低回報 (賣方策略)", 
+        probLow: "低勝率 / 高回報 (買方策略)", 
+        probMid: "勝率中性 (波動率策略)",
         opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
     }
 };
@@ -101,6 +124,8 @@ function setLanguage(lang) {
     currentLang = lang;
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
     document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+    
+    // 更新靜態文字
     document.getElementById('ui-title').innerText = i18n[lang].title;
     document.getElementById('ui-strategy-label').innerText = i18n[lang].strategy;
     document.getElementById('calcBtn').innerText = i18n[lang].calc;
@@ -110,15 +135,18 @@ function setLanguage(lang) {
     document.getElementById('ui-s4').innerText = i18n[lang].s4;
     document.getElementById('ui-premium').innerText = i18n[lang].premium;
     document.getElementById('ui-target').innerText = i18n[lang].target;
-    document.getElementById('ui-max-profit').innerText = i18n[lang].maxProfit;
-    document.getElementById('ui-max-loss').innerText = i18n[lang].maxLoss;
+    
+    // 修正：卡片標籤翻譯
+    document.getElementById('ui-max-reward-label').innerText = i18n[lang].maxReward;
+    document.getElementById('ui-max-risk-label').innerText = i18n[lang].maxRisk;
+    document.getElementById('ui-prob-label').innerText = i18n[lang].prob;
 
     const select = document.getElementById('strategySelect');
-    const val = select.value || 'long_call';
+    const currentVal = select.value || 'long_call';
     select.innerHTML = '';
     for (const [key, text] of Object.entries(i18n[lang].opt)) {
         const opt = new Option(text, key);
-        if (key === val) opt.selected = true;
+        if (key === currentVal) opt.selected = true;
         select.add(opt);
     }
     updateFields();
@@ -131,8 +159,8 @@ function updateFields() {
     document.getElementById('boxS4').style.display = (s === 'iron_condor') ? 'block' : 'none';
 }
 
-function getProfitAtPrice(p, strategy, v1, v2, v3, v4, prem) {
-    switch(strategy) {
+function getP(p, s, v1, v2, v3, v4, prem) {
+    switch(s) {
         case 'long_call': return Math.max(0, p - v1) - prem;
         case 'short_call': return prem - Math.max(0, p - v1);
         case 'long_put': return Math.max(0, v1 - p) - prem;
@@ -153,35 +181,38 @@ function runCalculation() {
     const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
     const prem = parseFloat(document.getElementById('premium').value), tgt = parseFloat(document.getElementById('target').value);
 
-    // 1. 計算最大風險與獲利
-    let mP = 0, mL = 0;
+    // 1. 卡片數據邏輯
+    let mP = 0, mL = 0, prb = "";
     const inf = i18n[currentLang].unlimited;
+    const lang = i18n[currentLang];
+
     switch(strategy) {
-        case 'long_call': mP = inf; mL = prem * 100; break;
-        case 'short_call': mP = prem * 100; mL = inf; break;
-        case 'long_put': mP = (v1-prem)*100; mL = prem * 100; break;
-        case 'short_put': mP = prem * 100; mL = (v1-prem)*100; break;
-        case 'bull_call': mP = (v2-v1-prem)*100; mL = prem*100; break;
-        case 'bear_put': mP = (v2-v1-prem)*100; mL = prem*100; break;
-        case 'straddle': mP = inf; mL = prem * 100; break;
-        case 'strangle': mP = inf; mL = prem * 100; break;
-        case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; break;
-        case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; break;
+        case 'long_call': mP = inf; mL = prem * 100; prb = lang.probLow; break;
+        case 'short_call': mP = prem * 100; mL = inf; prb = lang.probHigh; break;
+        case 'long_put': mP = (v1-prem)*100; mL = prem * 100; prb = lang.probLow; break;
+        case 'short_put': mP = prem * 100; mL = (v1-prem)*100; prb = lang.probHigh; break;
+        case 'bull_call': mP = (v2-v1-prem)*100; mL = prem*100; prb = lang.probMid; break;
+        case 'bear_put': mP = (v2-v1-prem)*100; mL = prem*100; prb = lang.probMid; break;
+        case 'straddle': mP = inf; mL = prem * 100; prb = lang.probLow; break;
+        case 'strangle': mP = inf; mL = prem * 100; prb = lang.probLow; break;
+        case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; prb = lang.probLow; break;
+        case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; prb = lang.probHigh; break;
     }
 
-    document.getElementById('summary-cards').style.display = 'grid';
+    document.getElementById('summary-panel').style.display = 'grid';
     document.getElementById('res-max-profit').innerText = isNaN(mP) ? mP : `$${mP.toFixed(0)}`;
     document.getElementById('res-max-loss').innerText = isNaN(mL) ? mL : `$${mL.toFixed(0)}`;
+    document.getElementById('res-prob').innerText = prb;
 
-    // 2. 準備繪圖
+    // 2. 準備 SVG
     const xMin = v1 * 0.5, xMax = (v4 || v3 || v2 || v1) * 1.5;
     let points = [];
     for(let i=0; i<=100; i++) {
         let x = xMin + (i * (xMax - xMin) / 100);
-        points.push({x: x, y: getProfitAtPrice(x, strategy, v1, v2, v3, v4, prem)});
+        points.push({x: x, y: getP(x, strategy, v1, v2, v3, v4, prem)});
     }
 
-    // 尋找平衡點
+    // 尋找 BEP
     let beps = [];
     for(let i=1; i<points.length; i++) {
         if((points[i-1].y < 0 && points[i].y >= 0) || (points[i-1].y > 0 && points[i].y <= 0)) {
@@ -189,10 +220,10 @@ function runCalculation() {
         }
     }
 
-    drawLabeledSVG(points, xMin, xMax, tgt, beps, strategy, v1, v2, v3, v4, prem);
+    drawEnhancedSVG(points, xMin, xMax, tgt, beps, strategy, v1, v2, v3, v4, prem);
 }
 
-function drawLabeledSVG(pts, xMin, xMax, tgt, beps, strategy, v1, v2, v3, v4, prem) {
+function drawEnhancedSVG(pts, xMin, xMax, tgt, beps, strategy, v1, v2, v3, v4, prem) {
     const svg = document.getElementById('mainChart');
     const W = 400, H = 320, MID = H / 2;
     const getX = (x) => ((x - xMin) / (xMax - xMin)) * W;
@@ -202,41 +233,36 @@ function drawLabeledSVG(pts, xMin, xMax, tgt, beps, strategy, v1, v2, v3, v4, pr
     let d = `M ${getX(pts[0].x)} ${getY(pts[0].y)}`;
     pts.forEach(p => d += ` L ${getX(p.x)} ${getY(p.y)}`);
 
-    const tgtPL = getProfitAtPrice(tgt, strategy, v1, v2, v3, v4, prem) * 100;
+    const tgtPL = getP(tgt, strategy, v1, v2, v3, v4, prem) * 100;
 
     svg.innerHTML = `
-        <!-- 背景配色 -->
         <rect width="${W}" height="${MID}" fill="rgba(34,197,94,0.06)" />
         <rect y="${MID}" width="${W}" height="${MID}" fill="rgba(239,68,68,0.06)" />
-        
-        <!-- 零軸 -->
-        <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#94a3b8" stroke-width="1.5" />
-        
-        <!-- 損益主路徑 -->
-        <path d="${d}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round" />
+        <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#94a3b8" />
+        <path d="${d}" fill="none" stroke="var(--primary)" stroke-width="3" />
 
-        <!-- 獲利/虧損區文字 -->
-        <text x="10" y="30" font-size="12" font-weight="bold" fill="var(--success)">▲ ${i18n[currentLang].profit}</text>
-        <text x="10" y="${H-20}" font-size="12" font-weight="bold" fill="var(--danger)">▼ ${i18n[currentLang].loss}</text>
+        <text x="10" y="25" font-size="11" font-weight="bold" fill="var(--success)">▲ ${i18n[currentLang].profit}</text>
+        <text x="10" y="${H-15}" font-size="11" font-weight="bold" fill="var(--danger)">▼ ${i18n[currentLang].loss}</text>
 
-        <!-- 平衡點 (BEP) 標註 -->
+        <!-- 盈虧平衡點 (BEP) 標註 -->
         ${beps.map(b => `
-            <circle cx="${getX(b)}" cy="${MID}" r="5" fill="var(--warning)" stroke="white" />
-            <text x="${getX(b)}" y="${MID + 22}" font-size="11" font-weight="bold" text-anchor="middle" fill="#b45309">$${b.toFixed(1)}</text>
+            <circle cx="${getX(b)}" cy="${MID}" r="5" fill="var(--warning)" stroke="#fff" stroke-width="2" />
+            <text x="${getX(b)}" y="${MID + 22}" font-size="11" font-weight="900" text-anchor="middle" fill="#b45309">$${b.toFixed(1)}</text>
         `).join('')}
 
-        <!-- 目標價標籤與數值 (氣泡框效果) -->
+        <!-- 氣泡框：標註結算損益 -->
         <line x1="${getX(tgt)}" y1="0" x2="${getX(tgt)}" y2="${H}" stroke="#0f172a" stroke-dasharray="4,4" />
-        <rect x="${getX(tgt)-40}" y="${getY(tgtPL/100)-30}" width="80" height="22" rx="5" fill="#0f172a" />
-        <text x="${getX(tgt)}" y="${getY(tgtPL/100)-14}" font-size="12" font-weight="bold" fill="white" text-anchor="middle">
-            $${tgtPL.toFixed(0)}
-        </text>
-        <text x="${getX(tgt)}" y="${H-5}" font-size="10" fill="#0f172a" text-anchor="middle">Target: $${tgt}</text>
+        <g transform="translate(${getX(tgt)-35}, ${getY(tgtPL/100)-35})">
+            <rect width="70" height="24" rx="6" fill="#0f172a" />
+            <text x="35" y="16" font-size="12" font-weight="bold" fill="white" text-anchor="middle">$${tgtPL.toFixed(0)}</text>
+            <path d="M 30 24 L 35 30 L 40 24 Z" fill="#0f172a" />
+        </g>
+        <text x="${getX(tgt)}" y="${H-5}" font-size="10" font-weight="bold" fill="#0f172a" text-anchor="middle">Target: $${tgt}</text>
     `;
 }
 
+// 初始啟動
 setLanguage('en');
 </script>
-
 </body>
 </html>
