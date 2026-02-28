@@ -1,83 +1,56 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Profit Calculator | 2026 Strategy Simulator</title>
+    <meta name="description" content="Advanced Options P/L Simulator with visual charting. Supports Iron Condor, Butterfly, and Spreads with real-time break-even analysis.">
     
-    <!-- SEO 核心標籤 -->
-    <title>2026 期權策略損益計算機 | 免費即時 Options Strategy Simulator</title>
-    <meta name="description" content="最專業的免費期權損益計算機。支援鐵鷹、蝴蝶、價差等10種策略，即時繪製損益曲線圖。2026 交易者必備工具。">
-    <meta name="keywords" content="期權計算機, 選擇權損益, Options Calculator, 鐵鷹策略, 蝴蝶價差, 損益圖, GitHub Pages">
-    <link rel="canonical" href="https://xn--6qqv7iy4ojosyrb.github.io" />
-
-    <!-- Social Media (Open Graph) -->
-    <meta property="og:title" content="2026 期權策略損益計算機 - 即時模擬圖表">
-    <meta property="og:description" content="支援 10 種期權組合策略，即時計算盈虧平衡點與損益曲線。">
-    <meta property="og:type" content="website">
-
-    <!-- 結構化資料 (JSON-LD) - 提高 Google 排名關鍵 -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Options Strategy Simulator",
-      "operatingSystem": "Web",
-      "applicationCategory": "FinanceApplication",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": "Real-time P/L calculation, 10+ Option Strategies, SVG Charting"
-    }
-    </script>
-
     <style>
-        :root { --bg: #f8fafc; --card: #ffffff; --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --danger: #ef4444; --text: #0f172a; }
+        :root { --bg: #f1f5f9; --card: #ffffff; --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --danger: #ef4444; --text: #0f172a; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; margin: 0; }
         .container { background: var(--card); padding: 24px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; }
-        .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
-        .lang-btn { background: #e2e8f0; border: none; padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        
+        /* 語言切換 */
+        .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 15px; }
+        .lang-btn { background: #e2e8f0; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
         .lang-btn.active { background: var(--primary); color: white; }
-        
-        /* 廣告位 Ad Slots */
-        .ad-slot { background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px; margin: 15px 0; text-align: center; color: #94a3b8; font-size: 12px; display: flex; align-items: center; justify-content: center; min-height: 90px; overflow: hidden; }
-        
-        h1 { text-align: center; margin: 0 0 10px 0; font-size: 24px; color: var(--primary); }
-        .subtitle { text-align: center; font-size: 14px; color: var(--secondary); margin-bottom: 20px; }
-        
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+
+        /* 廣告位 */
+        .ad-slot { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; margin: 15px 0; text-align: center; color: #94a3b8; font-size: 11px; display: flex; align-items: center; justify-content: center; min-height: 90px; }
+
+        h1 { text-align: center; margin: 0; font-size: 22px; color: var(--primary); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fff; }
-        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+        input, select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
         
-        #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        button#calcBtn:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        /* 結果顯示 */
         #result-display { margin-top: 15px; padding: 15px; border-radius: 8px; text-align: center; font-weight: 800; font-size: 18px; display: none; }
         .pos { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
         .neg { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-        article { font-size: 13px; line-height: 1.6; color: #475569; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+
+        /* 圖表區域 */
+        #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; height: 260px; }
+        svg { width: 100%; height: 100%; display: block; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="lang-switch">
-        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">English</button>
-        <button class="lang-btn" id="btn-zh" onclick="setLanguage('zh')">繁體中文</button>
+        <button class="lang-btn active" id="btn-en" onclick="setLanguage('en')">EN</button>
+        <button class="lang-btn" id="btn-zh" onclick="setLanguage('zh')">中文</button>
     </div>
 
-    <!-- H1 語義化 SEO 標題 -->
-    <h1 id="ui-title">Options Strategy Lab</h1>
-    <p class="subtitle" id="ui-subtitle">Visual P/L Simulator for Traders</p>
+    <h1 id="ui-title">Options Strategy Simulator</h1>
 
-    <!-- Ad Slot Top -->
-    <div class="ad-slot">
-        <!-- 這裡放入 AdSense 代碼 -->
-        <p>AdSense Auto-Responsive Banner</p>
-    </div>
+    <div class="ad-slot">Google AdSense - Top Banner</div>
 
     <div style="margin-bottom:15px">
-        <label id="ui-strategy-label">Select Strategy</label>
+        <label id="ui-strategy-label">Strategy</label>
         <select id="strategySelect" onchange="updateFields()"></select>
     </div>
 
@@ -87,51 +60,38 @@
         <div id="boxS3" style="display:none;"><label id="ui-s3">Strike 3</label><input type="number" id="s3" value="120"></div>
         <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4</label><input type="number" id="s4" value="130"></div>
         <div><label id="ui-premium">Net Premium ($)</label><input type="number" id="premium" value="5"></div>
-        <div><label id="ui-target">Target Price ($)</label><input type="number" id="target" value="105"></div>
+        <div><label id="ui-target">Target Price ($)</label><input type="number" id="target" value="115"></div>
     </div>
 
-    <button id="calcBtn" onclick="runCalculation()">Analyze Strategy</button>
+    <button id="calcBtn" onclick="runCalculation()">Analyze & Simulate</button>
 
     <div id="result-display"></div>
 
     <div id="chart-wrapper">
-        <svg id="mainChart" viewBox="0 0 400 240" preserveAspectRatio="none" style="width:100%; height:240px; display:block;"></svg>
+        <svg id="mainChart" viewBox="0 0 400 240"></svg>
     </div>
 
-    <!-- SEO 文章區塊 (讓 Google 爬蟲有內容可以讀) -->
-    <article id="ui-article">
-        <h3>How to use this tool?</h3>
-        <p>Enter your strikes and premium to see the risk/reward profile. This simulator helps you visualize complex strategies like Iron Condors or Butterfly spreads instantly.</p>
-    </article>
-
-    <!-- Ad Slot Bottom -->
-    <div class="ad-slot" style="min-height:150px">
-        <p>AdSense In-Article Ad Unit</p>
-    </div>
+    <div class="ad-slot" style="min-height:120px">Google AdSense - Feed Ad</div>
 </div>
 
 <script>
-// ... (保留之前的 JS 邏輯，但在 i18n 中加入 SEO 文字內容)
+/**
+ * 多語系配置
+ */
 const i18n = {
     en: {
-        title: "Options Strategy Lab",
-        subtitle: "Visual P/L Simulator for Traders",
-        strategy: "Strategy", calc: "Analyze Strategy",
+        title: "Strategy Simulator", strategy: "Strategy", calc: "Analyze & Simulate",
         s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4",
-        premium: "Net Premium", target: "Target Price", res: "P/L: ",
-        profit_zone: "Profit Zone", loss_zone: "Loss Zone",
-        article: "<h3>Why Visualize Options?</h3><p>Option strategies like Spreads or Iron Condors have non-linear P/L curves. Our tool calculates the break-even points to help you manage risk effectively.</p>",
+        premium: "Net Premium", target: "Target Price", res: "Estimated P/L: ",
+        profit: "PROFIT", loss: "LOSS", bep: "BEP",
         opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
     },
     zh: {
-        title: "期權策略模擬器",
-        subtitle: "交易者的視覺化損益分析工具",
-        strategy: "選擇策略", calc: "開始分析策略", 
+        title: "期權損益模擬器", strategy: "選擇策略", calc: "分析並繪製圖表",
         s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4",
-        premium: "淨權利金 ($)", target: "目標結算價", res: "預估損益: ",
-        profit_zone: "獲利區", loss_zone: "虧損區",
-        article: "<h3>如何分析期權損益？</h3><p>期權組合策略（如鐵鷹或蝴蝶價差）具有非線性的損益曲線。本工具協助您精確計算盈虧平衡點，即時掌握最大風險與潛在收益。</p>",
-        opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合 (Straddle)", strangle: "勒式組合 (Strangle)", butterfly: "蝴蝶價差 (Butterfly)", iron_condor: "鐵鷹策略 (Iron Condor)" }
+        premium: "淨權利金", target: "預計價格", res: "估計損益: ",
+        profit: "獲利區", loss: "虧損區", bep: "平衡點",
+        opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
     }
 };
 
@@ -143,7 +103,6 @@ function setLanguage(lang) {
     document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
     
     document.getElementById('ui-title').innerText = i18n[lang].title;
-    document.getElementById('ui-subtitle').innerText = i18n[lang].subtitle;
     document.getElementById('ui-strategy-label').innerText = i18n[lang].strategy;
     document.getElementById('calcBtn').innerText = i18n[lang].calc;
     document.getElementById('ui-s1').innerText = i18n[lang].s1;
@@ -152,7 +111,6 @@ function setLanguage(lang) {
     document.getElementById('ui-s4').innerText = i18n[lang].s4;
     document.getElementById('ui-premium').innerText = i18n[lang].premium;
     document.getElementById('ui-target').innerText = i18n[lang].target;
-    document.getElementById('ui-article').innerHTML = i18n[lang].article;
 
     const select = document.getElementById('strategySelect');
     const val = select.value || 'long_call';
@@ -165,8 +123,116 @@ function setLanguage(lang) {
     updateFields();
 }
 
-// ... 剩下的 runCalculation 和 drawAdvancedSVG 邏輯與前一版相同 ...
-// (因篇幅限制，其餘計算邏輯維持不變)
+function updateFields() {
+    const s = document.getElementById('strategySelect').value;
+    document.getElementById('boxS2').style.display = ['bull_call','bear_put','strangle','butterfly','iron_condor'].includes(s) ? 'block' : 'none';
+    document.getElementById('boxS3').style.display = ['butterfly','iron_condor'].includes(s) ? 'block' : 'none';
+    document.getElementById('boxS4').style.display = (s === 'iron_condor') ? 'block' : 'none';
+}
+
+/**
+ * 損益計算核心
+ */
+function getProfitAtPrice(p, strategy, v1, v2, v3, v4, prem) {
+    switch(strategy) {
+        case 'long_call': return Math.max(0, p - v1) - prem;
+        case 'short_call': return prem - Math.max(0, p - v1);
+        case 'long_put': return Math.max(0, v1 - p) - prem;
+        case 'short_put': return prem - Math.max(0, v1 - p);
+        case 'bull_call': return (Math.max(0, p - v1) - Math.max(0, p - v2)) - prem;
+        case 'bear_put': return (Math.max(0, v2 - p) - Math.max(0, v1 - p)) - prem;
+        case 'straddle': return (Math.max(0, p - v1) + Math.max(0, v1 - p)) - prem;
+        case 'strangle': return (Math.max(0, v1 - p) + Math.max(0, p - v2)) - prem;
+        case 'butterfly': return (Math.max(0, p - v1) - 2 * Math.max(0, p - v2) + Math.max(0, p - v3)) - prem;
+        case 'iron_condor': return prem - (Math.max(0, v1 - p) - Math.max(0, v2 - p) + Math.max(0, p - v4) - Math.max(0, p - v3));
+        default: return 0;
+    }
+}
+
+function runCalculation() {
+    const strategy = document.getElementById('strategySelect').value;
+    const v1 = parseFloat(document.getElementById('s1').value), v2 = parseFloat(document.getElementById('s2').value);
+    const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
+    const prem = parseFloat(document.getElementById('premium').value), tgt = parseFloat(document.getElementById('target').value);
+
+    const totalPL = getProfitAtPrice(tgt, strategy, v1, v2, v3, v4, prem) * 100;
+    const resDiv = document.getElementById('result-display');
+    resDiv.style.display = 'block';
+    resDiv.className = totalPL >= 0 ? 'pos' : 'neg';
+    resDiv.innerText = `${i18n[currentLang].res} $${totalPL.toFixed(2)}`;
+
+    // 繪圖範圍
+    const xMin = v1 * 0.5, xMax = (v4 || v3 || v2 || v1) * 1.5;
+    let points = [];
+    for(let i=0; i<=120; i++) {
+        let px = xMin + (i * (xMax - xMin) / 120);
+        points.push({x: px, y: getProfitAtPrice(px, strategy, v1, v2, v3, v4, prem)});
+    }
+    // 加入關鍵點與尋找 BEP (盈虧平衡點)
+    let beps = [];
+    for(let i=1; i<points.length; i++) {
+        if((points[i-1].y <= 0 && points[i].y > 0) || (points[i-1].y >= 0 && points[i].y < 0)) {
+            beps.push((points[i-1].x + points[i].x) / 2);
+        }
+    }
+    
+    drawEnhancedSVG(points, xMin, xMax, tgt, beps);
+}
+
+function drawEnhancedSVG(pts, xMin, xMax, tgt, beps) {
+    const svg = document.getElementById('mainChart');
+    const W = 400, H = 240, MID = H / 2;
+    const getX = (x) => ((x - xMin) / (xMax - xMin)) * W;
+    const maxY = Math.max(...pts.map(p => Math.abs(p.y))) * 1.5 || 1;
+    const getY = (y) => MID - (y / maxY) * (H / 3);
+
+    // 建立盈虧路徑與背景填充
+    let lineD = `M ${getX(pts[0].x)} ${getY(pts[0].y)}`;
+    let areaD = `M ${getX(pts[0].x)} ${MID}`;
+    pts.forEach(p => {
+        lineD += ` L ${getX(p.x)} ${getY(p.y)}`;
+        areaD += ` L ${getX(p.x)} ${getY(p.y)}`;
+    });
+    areaD += ` L ${getX(pts[pts.length-1].x)} ${MID} Z`;
+
+    let bepHtml = beps.map(b => `
+        <circle cx="${getX(b)}" cy="${MID}" r="4" fill="#f59e0b" stroke="white" stroke-width="1" />
+        <text x="${getX(b)}" y="${MID + 18}" font-size="9" font-weight="bold" fill="#b45309" text-anchor="middle">${i18n[currentLang].bep} $${b.toFixed(1)}</text>
+    `).join('');
+
+    svg.innerHTML = `
+        <defs>
+            <linearGradient id="plGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--success)" stop-opacity="0.2"/>
+                <stop offset="50%" stop-color="white" stop-opacity="0"/>
+                <stop offset="100%" stop-color="var(--danger)" stop-opacity="0.2"/>
+            </linearGradient>
+        </defs>
+        
+        <!-- 背景區間顏色 -->
+        <rect x="0" y="0" width="${W}" height="${MID}" fill="rgba(34,197,94,0.05)" />
+        <rect x="0" y="${MID}" width="${W}" height="${H/2}" fill="rgba(239,68,68,0.05)" />
+
+        <!-- 損益曲線填充與主線 -->
+        <path d="${areaD}" fill="url(#plGrad)" />
+        <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#94a3b8" stroke-width="1" />
+        <path d="${lineD}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round" />
+
+        <!-- 文字標籤 -->
+        <text x="10" y="25" font-size="11" font-weight="bold" fill="var(--success)">▲ ${i18n[currentLang].profit}</text>
+        <text x="10" y="${H-15}" font-size="11" font-weight="bold" fill="var(--danger)">▼ ${i18n[currentLang].loss}</text>
+
+        <!-- BEP 圓點與標註 -->
+        ${bepHtml}
+
+        <!-- 目標價虛線 -->
+        <line x1="${getX(tgt)}" y1="0" x2="${getX(tgt)}" y2="${H}" stroke="#0f172a" stroke-width="1" stroke-dasharray="4,4" />
+        <text x="${getX(tgt) + 5}" y="15" font-size="10" fill="#0f172a" font-weight="bold">Target: $${tgt}</text>
+    `;
+}
+
+setLanguage('en');
 </script>
+
 </body>
 </html>
