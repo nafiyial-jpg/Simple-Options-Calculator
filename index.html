@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Options Lab | BEP-Centered Simulator</title>
+    <title>Pro Options Lab | BEP-Centered Simulator 2026</title>
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
@@ -11,27 +11,41 @@
         }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .ad-banner { width: 100%; max-width: 600px; min-height: 90px; margin: 15px 0; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 11px; border: 1px dashed rgba(255,255,255,0.1); }
+
         .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
         .lang-btn { background: var(--input-bg); border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text); transition: 0.2s; }
         .lang-btn.active { background: var(--primary) !important; color: #000 !important; font-weight: 800; }
+        
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px; }
         label { display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
         input, select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; }
+        
         button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        button#calcBtn:hover { filter: brightness(1.1); transform: scale(1.01); }
+
         #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .data-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .full-card { grid-column: span 2; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 6px; text-transform: uppercase; }
         .data-val { font-size: 18px; font-weight: 800; }
+
         #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; border: 1px solid rgba(255,255,255,0.05); }
         svg { width: 100%; height: 100%; display: block; }
         .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; }
-        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
         .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--secondary); font-size: 14px; opacity: 0.5; }
     </style>
 </head>
 <body>
+
+<!-- Top Ad Banner -->
+<div class="ad-banner">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXX" data-ad-slot="XXXXXXXXX" data-ad-format="horizontal"></ins>
+</div>
 
 <div class="container">
     <div class="lang-switch">
@@ -39,6 +53,7 @@
         <button id="btn-zh" class="lang-btn" onclick="setLanguage('zh')">中文</button>
     </div>
     <h1 id="ui-title">Pro Options Lab</h1>
+    
     <div class="grid">
         <div style="grid-column: span 2;"><label id="ui-strategy-label">Strategy</label><select id="strategySelect" onchange="updateFields()"></select></div>
         <div><label id="ui-s1">Strike 1</label><input type="number" id="s1" value="100"></div>
@@ -48,17 +63,25 @@
         <div><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" value="3.5"></div>
         <div><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105"></div>
     </div>
+
     <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY</button>
+
     <div id="summary-panel">
         <div class="data-card"><span class="data-label" id="ui-max-reward-label">Max Reward</span><span id="res-max-profit" class="data-val" style="color:var(--success)">--</span></div>
         <div class="data-card"><span class="data-label" id="ui-max-risk-label">Max Risk</span><span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span></div>
         <div class="data-card full-card"><div id="res-prob" style="color:var(--primary); font-weight:700; font-size:13px; text-align: center;">--</div></div>
     </div>
+
     <div id="chart-wrapper">
         <div id="empty-msg" class="empty-state">Click Analyze to view P/L Curve</div>
         <div id="chart-tooltip" class="tooltip"></div>
         <svg id="mainChart" viewBox="0 0 400 360"></svg>
     </div>
+</div>
+
+<!-- Bottom Ad Banner -->
+<div class="ad-banner">
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXX" data-ad-slot="YYYYYYYYY" data-ad-format="auto"></ins>
 </div>
 
 <script>
@@ -84,6 +107,7 @@
         const cur = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
         updateFields();
+        // 如果圖表已經在顯示，切換語言後重新繪製以同步標籤
         if(document.getElementById('empty-msg').style.display === 'none') runCalculation();
     }
 
@@ -117,7 +141,7 @@
         const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
         const dL = i18n[currentLang];
 
-        // 計算 Summary
+        // 數據卡片計算
         let mP = 0, mL = 0;
         switch(sSelect) {
             case 'long_call': mP = dL.unlimited; mL = prem * 100; break;
@@ -125,7 +149,7 @@
             case 'bull_call': mP = (v2-v1-prem)*100; mL = prem*100; break;
             case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; break;
             case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; break;
-            default: mP = "---"; mL = prem*100;
+            default: mP = dL.unlimited; mL = prem * 100;
         }
         document.getElementById('res-max-profit').innerText = typeof mP === 'number' ? `$${mP.toFixed(0)}` : mP;
         document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
@@ -143,10 +167,11 @@
             }
         }
         
+        // 設定繪圖中心點：優先使用第一個 BEP，若無則用現價 S
         let centerIdx = beps.length > 0 ? beps[0].idx : data.findIndex(d => d.x >= S);
         if (centerIdx < 0) centerIdx = 100;
 
-        document.getElementById('res-prob').innerText = beps.length > 0 ? `Break-even at $${beps.map(b=>b.x.toFixed(1)).join(', ')}` : "No BEP in range";
+        document.getElementById('res-prob').innerText = beps.length > 0 ? `BEP: $${beps.map(b=>b.x.toFixed(1)).join(', ')}` : "No BEP Found";
         drawSVG(data, xMin, xMax, centerIdx, beps);
     }
 
@@ -174,11 +199,14 @@
             <path d="${fillD}" fill="var(--success)" opacity="0.2" clip-path="url(#cp-profit)" />
             <path d="${fillD}" fill="var(--danger)" opacity="0.2" clip-path="url(#cp-loss)" />
             <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1.5" />
+            
+            <!-- 從中心向兩邊展開 -->
             <path d="${buildPath(leftArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             <path d="${buildPath(rightArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
+            
             ${beps.map(b => `
                 <g>
-                    <line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.5" />
+                    <line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.4" />
                     <circle cx="${getX(b.x)}" cy="${MID}" r="4" fill="#fbbf24" />
                     <text x="${getX(b.x)}" y="${MID + 18}" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">${d.bep}: ${b.x.toFixed(1)}</text>
                 </g>
