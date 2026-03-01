@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Options Lab | Precision Symmetric Visualizer</title>
+    <title>Pro Options Lab | Absolute Symmetric Visualizer</title>
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
@@ -64,7 +64,7 @@
 
 <script>
     const i18n = {
-        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", probHint: "Strategy Hint", profit: "PROFIT", loss: "LOSS", price: "Price", pl: "P/L", bep: "Break-even", unlimited: "Unlimited", err: "Invalid order: Strike 1 < 2 < 3 required!", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }, hints: { buyer: "High Reward / Low Win Rate", seller: "High Win Rate / Limited Income", neutral: "Volatility Strategy" } },
+        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", probHint: "Strategy Hint", profit: "PROFIT", loss: "LOSS", price: "Price", pl: "P/L", bep: "Break-even", unlimited: "Unlimited", err: "Invalid order: Strikes must be S1 < S2 < S3!", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }, hints: { buyer: "High Reward / Low Win Rate", seller: "High Win Rate / Limited Income", neutral: "Volatility Strategy" } },
         zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "理論最大獲利", maxRisk: "理論最大風險", probHint: "策略特性提示", profit: "獲利區", loss: "虧損區", price: "目前股價", pl: "損益金額", bep: "損益點", unlimited: "理論無限", err: "履約價順序錯誤！請確保 S1 < S2 < S3", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }, hints: { buyer: "高回報 / 低勝率 (買方策略)", seller: "高勝率 / 收益有限 (賣方策略)", neutral: "波動率/中性策略" } }
     };
 
@@ -88,6 +88,7 @@
         const cur = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
         updateFields();
+        // 自動重新計算以同步圖表文字
         if(document.getElementById('res-max-profit').innerText !== '--') runCalculation(); 
     }
 
@@ -119,12 +120,8 @@
         const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
         const dL = i18n[currentLang];
 
-        // 修正 2: 蝴蝶策略專屬驗證
-        if (s === 'butterfly') {
-            if(v1 >= v2 || v2 >= v3) { alert(dL.err); return; }
-        } else if (s === 'iron_condor') {
-            if(v1 >= v2 || v2 >= v3 || v3 >= v4) { alert("S1 < S2 < S3 < S4 Required!"); return; }
-        }
+        if (s === 'butterfly' && (v1 >= v2 || v2 >= v3)) { alert(dL.err); return; }
+        if (s === 'iron_condor' && (v1 >= v2 || v2 >= v3 || v3 >= v4)) { alert("S1 < S2 < S3 < S4 Required!"); return; }
 
         let mP = 0, mL = 0, hint = "";
         switch(s) {
@@ -137,7 +134,10 @@
         document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
         document.getElementById('res-prob').innerText = hint;
 
-        const xMin = S * 0.75, xMax = S * 1.25;
+        // 核心修正：讓 Spot Price (現價) 永遠在 400px 畫布的正中央
+        const range = S * 0.25; 
+        const xMin = S - range, xMax = S + range; 
+        
         let data = [];
         let beps = [];
         for(let i=0; i<=200; i++) {
@@ -147,8 +147,7 @@
             if (i > 0 && ((data[i-1].y < 0 && y >= 0) || (data[i-1].y > 0 && y <= 0))) beps.push({x: p});
         }
         
-        // 修正 1: 所有策略絕對幾何中心對稱繪製
-        drawSVG(data, xMin, xMax, 100, beps); 
+        drawSVG(data, xMin, xMax, 100, beps); // 固定 100 索引（畫布中心）向兩側畫開
     }
 
     function drawSVG(data, xMin, xMax, cIdx, beps) {
@@ -157,22 +156,25 @@
         const maxY = Math.max(...data.map(d => Math.abs(d.y))) * 1.5 || 1;
         const getY = (y) => MID - (y / maxY) * (H * 0.4);
 
-        const buildPath = (arr) => arr.length ? `M ${getX(arr[0].x)} ${getY(arr[0].y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ') : "";
+        const buildPath = (arr) => arr.length ? `M ${getX(arr.x)} ${getY(arr.y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ') : "";
         const leftArr = data.slice(0, cIdx + 1).reverse();
         const rightArr = data.slice(cIdx);
-        const fullPathD = `M ${getX(data[0].x)} ${getY(data[0].y)} ` + data.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
-        const fillD = `${fullPathD} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data[0].x)} ${MID} Z`;
+        const fullPathD = `M ${getX(data.x)} ${getY(data.y)} ` + data.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
+        const fillD = `${fullPathD} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data.x)} ${MID} Z`;
 
         svg.innerHTML = `
             <defs>
                 <clipPath id="up"><rect x="0" y="0" width="${W}" height="${MID}" /></clipPath>
                 <clipPath id="down"><rect x="0" y="${MID}" width="${W}" height="${MID}" /></clipPath>
             </defs>
-            <path d="${fillD}" fill="var(--success)" opacity="0.2" clip-path="url(#up)" />
-            <path d="${fillD}" fill="var(--danger)" opacity="0.2" clip-path="url(#down)" />
+            <path d="${fillD}" fill="var(--success)" opacity="0.22" clip-path="url(#up)" />
+            <path d="${fillD}" fill="var(--danger)" opacity="0.22" clip-path="url(#down)" />
             <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1.5" />
+            
+            <!-- 對稱展開動畫線條 -->
             <path d="${buildPath(leftArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             <path d="${buildPath(rightArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
+            
             ${beps.map(b => `
                 <g><line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.4" />
                 <circle cx="${getX(b.x)}" cy="${MID}" r="4" fill="#fbbf24" /><text x="${getX(b.x)}" y="${MID + 22}" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">${d.bep}: ${b.x.toFixed(1)}</text></g>
