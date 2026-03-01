@@ -30,6 +30,9 @@
         .prob-tag { color: #1d4ed8; font-weight: 700; font-size: 13px; margin-top: 4px; }
         #chart-wrapper { position: relative; margin-top: 20px; background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; overflow: hidden; height: 340px; }
         svg { width: 100%; height: 100%; display: block; }
+        
+        /* 廣告位容器樣式 */
+        .ad-container { margin: 20px 0; text-align: center; min-height: 100px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -48,33 +51,25 @@
     </div>
 
     <div class="grid">
-        <div>
-            <label id="ui-s1">Lower Strike (低履約價)</label>
-            <input type="number" id="s1" value="100">
-        </div>
-        <div id="boxS2" style="display:none;">
-            <label id="ui-s2">Higher Strike (高履約價)</label>
-            <input type="number" id="s2" value="110">
-        </div>
-        <div id="boxS3" style="display:none;">
-            <label id="ui-s3">Additional Strike 3</label>
-            <input type="number" id="s3" value="120">
-        </div>
-        <div id="boxS4" style="display:none;">
-            <label id="ui-s4">Additional Strike 4</label>
-            <input type="number" id="s4" value="130">
-        </div>
-        <div>
-            <label id="ui-premium">Total Net Premium ($)</label>
-            <input type="number" id="premium" value="5">
-        </div>
-        <div>
-            <label id="ui-target">Target Stock Price ($)</label>
-            <input type="number" id="target" value="105">
-        </div>
+        <div><label id="ui-s1">Lower Strike</label><input type="number" id="s1" value="100"></div>
+        <div id="boxS2" style="display:none;"><label id="ui-s2">Higher Strike</label><input type="number" id="s2" value="110"></div>
+        <div id="boxS3" style="display:none;"><label id="ui-s3">Strike 3</label><input type="number" id="s3" value="120"></div>
+        <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4</label><input type="number" id="s4" value="130"></div>
+        <div><label id="ui-premium">Net Premium ($)</label><input type="number" id="premium" value="5"></div>
+        <div><label id="ui-target">Target Price ($)</label><input type="number" id="target" value="105"></div>
     </div>
 
     <button id="calcBtn">Analyze Risk & Reward</button>
+
+    <!-- 廣告位整合：按鈕下方 -->
+    <div class="ad-container" id="ad-slot-1">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" 
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+    </div>
 
     <div id="summary-panel">
         <div class="data-card">
@@ -148,10 +143,7 @@
         const currentVal = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k, v]) => `<option value="${k}" ${k === currentVal ? 'selected' : ''}>${v}</option>`).join('');
         
-        // 修正點：切換語言時若已有結果，自動重新計算以更新圖表與卡片內容
-        if (document.getElementById('summary-panel').style.display === 'grid') {
-            runCalculation();
-        }
+        if (document.getElementById('summary-panel').style.display === 'grid') { runCalculation(); }
         updateFields();
     }
 
@@ -207,9 +199,8 @@
         document.getElementById('res-max-loss').innerText = isNaN(mL) ? mL : `$${mL.toFixed(0)}`;
         document.getElementById('res-prob').innerText = prb;
 
-        // 核心：解決左右留白問題 (自動計算緊湊的 X 軸邊界)
         const strikes = [v1, v2, v3, v4, tgt].filter(v => !isNaN(v));
-        const xMin = Math.min(...strikes) * 0.94; // 僅預留 6% 餘裕
+        const xMin = Math.min(...strikes) * 0.94;
         const xMax = Math.max(...strikes) * 1.06;
 
         let pts = [];
@@ -234,10 +225,10 @@
         const maxY = Math.max(...pts.map(p => Math.abs(p.y))) * 1.6 || 1;
         const getY = (y) => MID - (y / maxY) * (H / 2.8);
 
-        let d = `M ${getX(pts.x)} ${getY(pts.y)}`;
-        pts.forEach(p => d += ` L ${getX(p.x)} ${getY(p.y)}`);
+        // 修正：pts 是數組，必須取得 pts[0].x 作為 M 起點
+        let dPath = `M ${getX(pts[0].x)} ${getY(pts[0].y)}`;
+        pts.slice(1).forEach(p => dPath += ` L ${getX(p.x)} ${getY(p.y)}`);
 
-        // 重新獲取當前語系文字，確保圖表內部也同步翻譯
         const dLang = i18n[currentLang];
         const strategy = document.getElementById('strategySelect').value;
         const v1 = parseFloat(document.getElementById('s1').value);
@@ -251,13 +242,13 @@
             <rect width="${W}" height="${MID}" fill="rgba(34,197,94,0.06)" />
             <rect y="${MID}" width="${W}" height="${MID}" fill="rgba(239,68,68,0.06)" />
             <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#94a3b8" stroke-width="1.5" />
-            <path d="${d}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linejoin="round" />
+            <path d="${dPath}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linejoin="round" />
             
-            <text x="10" y="25" font-size="11" font-weight="900" fill="var(--success)">▲ ${dLang.profit}</text>
-            <text x="10" y="${H-15}" font-size="11" font-weight="900" fill="var(--danger)">▼ ${dLang.loss}</text>
+            <text x="10" y="25" font-size="11" font-weight="900" fill="#22c55e">▲ ${dLang.profit}</text>
+            <text x="10" y="${H-15}" font-size="11" font-weight="900" fill="#ef4444">▼ ${dLang.loss}</text>
 
             ${beps.map(b => `
-                <circle cx="${getX(b)}" cy="${MID}" r="5" fill="var(--warning)" stroke="#fff" stroke-width="2" />
+                <circle cx="${getX(b)}" cy="${MID}" r="5" fill="#f59e0b" stroke="#fff" stroke-width="2" />
                 <text x="${getX(b)}" y="${MID + 22}" font-size="11" font-weight="900" text-anchor="middle" fill="#b45309">$${b.toFixed(1)}</text>
             `).join('')}
 
@@ -271,15 +262,21 @@
         `;
     }
 
-    // 事件監聽器
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
         document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
         document.getElementById('calcBtn').addEventListener('click', runCalculation);
         document.getElementById('strategySelect').addEventListener('change', updateFields);
-        setLanguage('en'); // 初始初始化
+        setLanguage('en');
+        
+        // 觸發 AdSense 載入
+        (adsbygoogle = window.adsbygoogle || []).push({});
     });
 })();
 </script>
+
+<!-- Google AdSense SDK -->
+<script async src="https://pagead2.googlesyndication.com" crossorigin="anonymous"></script>
+
 </body>
 </html>
