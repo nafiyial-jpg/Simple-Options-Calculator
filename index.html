@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Options Lab | Advanced Strategy Simulator</title>
+    <title>Pro Options Lab | Symmetric Strategy Visualizer</title>
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
@@ -11,40 +11,28 @@
         }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.1); }
-        
-        .ad-banner { width: 100%; max-width: 600px; min-height: 90px; margin: 15px 0; background: rgba(255,255,255,0.02); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 11px; border: 1px dashed rgba(255,255,255,0.1); }
-
         .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
         .lang-btn { background: var(--input-bg); border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text); transition: 0.2s; }
         .lang-btn.active { background: var(--primary) !important; color: #000 !important; font-weight: 800; }
-        
-        /* 修正 3: 欄位不要擠在一起 */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 15px; }
         .full-width { grid-column: span 2; }
         label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; box-sizing: border-box; }
-        
         button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.2s; }
         button#calcBtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
         #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .data-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .full-card { grid-column: span 2; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 6px; text-transform: uppercase; }
         .data-val { font-size: 18px; font-weight: 800; }
-
         #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; border: 1px solid rgba(255,255,255,0.05); }
         svg { width: 100%; height: 100%; display: block; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        
-        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; }
+        .path-anim { stroke-dasharray: 1500; stroke-dashoffset: 1500; animation: drawLine 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
-        .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--secondary); font-size: 14px; opacity: 0.5; }
     </style>
 </head>
 <body>
-
-<div class="ad-banner"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXX" data-ad-slot="XXX" data-ad-format="horizontal"></ins></div>
 
 <div class="container">
     <div class="lang-switch">
@@ -68,26 +56,29 @@
     <div id="summary-panel">
         <div class="data-card"><span class="data-label" id="ui-max-reward-label">Max Reward</span><span id="res-max-profit" class="data-val" style="color:var(--success)">--</span></div>
         <div class="data-card"><span class="data-label" id="ui-max-risk-label">Max Risk</span><span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span></div>
-        <!-- 修正 2: 恢復特性提示卡片 -->
-        <div class="data-card full-card">
-            <span class="data-label" id="ui-prob-label">Strategy Hint</span>
-            <div id="res-prob" style="color:var(--primary); font-weight:700; font-size:13px;">--</div>
-        </div>
+        <div class="data-card full-card"><span class="data-label" id="ui-prob-label">Strategy Hint</span><div id="res-prob" style="color:var(--primary); font-weight:700; font-size:13px; text-align: center;">--</div></div>
     </div>
 
     <div id="chart-wrapper">
-        <div id="empty-msg" class="empty-state">Click Analyze to view P/L Curve</div>
         <div id="chart-tooltip" class="tooltip"></div>
         <svg id="mainChart" viewBox="0 0 400 360"></svg>
     </div>
 </div>
 
-<div class="ad-banner"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXX" data-ad-slot="XXX" data-ad-format="auto"></ins></div>
-
 <script>
     const i18n = {
-        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", probHint: "Strategy Characteristics", profit: "PROFIT", loss: "LOSS", empty: "Click Analyze to view P/L Curve", price: "Price", pl: "P/L", bep: "BEP", unlimited: "Unlimited", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }, hints: { buyer: "High Reward / Low Win Rate", seller: "Limited Income / High Win Rate", neutral: "Non-Directional / Volatility Play" } },
-        zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "理論最大獲利", maxRisk: "理論最大風險", probHint: "策略特性提示", profit: "獲利區", loss: "虧損區", empty: "點擊按鈕生成損益圖表", price: "目前股價", pl: "損益金額", bep: "兩平點", unlimited: "理論無限", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }, hints: { buyer: "高回報 / 低勝率 (買方策略)", seller: "收益有限 / 高勝率 (賣方策略)", neutral: "無方向性 / 波動率策略" } }
+        en: { 
+            title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", probHint: "Strategy Hint", profit: "PROFIT", loss: "LOSS", price: "Price", pl: "P/L", bep: "BEP", unlimited: "Unlimited", 
+            error_strike: "Invalid Strike Order: Strike 1 < Strike 2 < Strike 3 < Strike 4 required!",
+            opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" },
+            hints: { buyer: "High Reward / Low Win Rate", seller: "High Win Rate / Limited Income", neutral: "Volatility Strategy" }
+        },
+        zh: { 
+            title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "理論最大獲利", maxRisk: "理論最大風險", probHint: "策略特性提示", profit: "獲利區", loss: "虧損區", price: "股價", pl: "損益", bep: "兩平點", unlimited: "理論無限", 
+            error_strike: "設定錯誤：必須符合 履約價 1 < 2 < 3 < 4 的順序！",
+            opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" },
+            hints: { buyer: "高回報 / 低勝率 (買方策略)", seller: "高勝率 / 收益有限 (賣方策略)", neutral: "波動率/中性策略" }
+        }
     };
 
     let currentLang = 'en';
@@ -97,8 +88,6 @@
         const d = i18n[lang];
         document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
         document.getElementById('btn-zh').className = 'lang-btn' + (lang==='zh'?' active':'');
-        
-        // 修正 1: 全部中文同步
         document.getElementById('ui-title').innerText = d.title;
         document.getElementById('ui-strategy-label').innerText = d.strategy;
         document.getElementById('calcBtn').innerText = d.calc;
@@ -108,13 +97,10 @@
         document.getElementById('ui-s1').innerText = d.s1; document.getElementById('ui-s2').innerText = d.s2;
         document.getElementById('ui-s3').innerText = d.s3; document.getElementById('ui-s4').innerText = d.s4;
         document.getElementById('ui-premium').innerText = d.premium; document.getElementById('ui-target').innerText = d.target;
-        document.getElementById('empty-msg').innerText = d.empty;
-
         const select = document.getElementById('strategySelect');
         const cur = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
         updateFields();
-        if(document.getElementById('empty-msg').style.display === 'none') runCalculation();
     }
 
     function updateFields() {
@@ -140,17 +126,20 @@
     }
 
     function runCalculation() {
-        document.getElementById('empty-msg').style.display = 'none';
         const s = document.getElementById('strategySelect').value;
         const v1 = parseFloat(document.getElementById('s1').value), v2 = parseFloat(document.getElementById('s2').value);
         const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
         const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
         const dL = i18n[currentLang];
 
+        // 驗證邏輯：確保 Strike 順序正確
+        if (s === 'bull_call' || s === 'bear_put') { if(v1 >= v2) { alert(dL.error_strike); return; } }
+        if (s === 'butterfly') { if(v1 >= v2 || v2 >= v3) { alert(dL.error_strike); return; } }
+        if (s === 'iron_condor') { if(v1 >= v2 || v2 >= v3 || v3 >= v4) { alert(dL.error_strike); return; } }
+
         let mP = 0, mL = 0, hint = "";
         switch(s) {
             case 'long_call': mP = dL.unlimited; mL = prem * 100; hint = dL.hints.buyer; break;
-            case 'short_call': mP = prem * 100; mL = dL.unlimited; hint = dL.hints.seller; break;
             case 'iron_condor': mP = prem * 100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; hint = dL.hints.seller; break;
             case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; hint = dL.hints.neutral; break;
             default: mP = dL.unlimited; mL = prem*100; hint = dL.hints.neutral;
@@ -159,20 +148,19 @@
         document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
         document.getElementById('res-prob').innerText = hint;
 
-        const xMin = S * 0.7, xMax = S * 1.3;
+        const xMin = S * 0.75, xMax = S * 1.25;
         let data = [];
         let beps = [];
-        for(let i=0; i<=200; i++) {
-            let p = xMin + (i * (xMax - xMin) / 200);
+        for(let i=0; i<=240; i++) { // 增加點數讓曲線更滑順
+            let p = xMin + (i * (xMax - xMin) / 240);
             let y = getP(p, s, v1, v2, v3, v4, prem);
             data.push({x: p, y: y});
-            if (i > 0 && ((data[i-1].y < 0 && y >= 0) || (data[i-1].y > 0 && y <= 0))) beps.push({x: p, idx: i});
+            if (i > 0 && ((data[i-1].y < 0 && y >= 0) || (data[i-1].y > 0 && y <= 0))) beps.push({x: p});
         }
         
-        // 修正 4: 智慧繪圖中心點 (蝴蝶/鐵鷹用 Strike 2, 其他用 BEP)
-        let centerIdx = ['butterfly','iron_condor'].includes(s) ? data.findIndex(d => d.x >= v2) : (beps.length > 0 ? beps[0].idx : 100);
-        
-        drawSVG(data, xMin, xMax, centerIdx, beps);
+        // 核心修正：固定從數組中點展開，達到絕對對稱效果
+        const symmetricCenterIdx = Math.floor(data.length / 2);
+        drawSVG(data, xMin, xMax, symmetricCenterIdx, beps);
     }
 
     function drawSVG(data, xMin, xMax, cIdx, beps) {
@@ -183,10 +171,9 @@
 
         const leftArr = data.slice(0, cIdx + 1).reverse();
         const rightArr = data.slice(cIdx);
-        const buildPath = (arr) => arr.length ? `M ${getX(arr[0].x)} ${getY(arr[0].y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ') : "";
-        
-        const fullPath = `M ${getX(data[0].x)} ${getY(data[0].y)} ` + data.map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
-        const fillD = `${fullPath} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data[0].x)} ${MID} Z`;
+        const buildPath = (arr) => arr.length ? `M ${getX(arr.x)} ${getY(arr.y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ') : "";
+        const fullPath = `M ${getX(data.x)} ${getY(data.y)} ` + data.map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
+        const fillD = `${fullPath} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data.x)} ${MID} Z`;
 
         svg.innerHTML = `
             <defs>
@@ -199,14 +186,11 @@
             <path d="${buildPath(leftArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             <path d="${buildPath(rightArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             ${beps.map(b => `
-                <g>
-                    <line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.5" />
-                    <circle cx="${getX(b.x)}" cy="${MID}" r="4" fill="#fbbf24" />
-                    <text x="${getX(b.x)}" y="${MID + 20}" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">${d.bep}: ${b.x.toFixed(1)}</text>
-                </g>
+                <g><line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.4" />
+                <circle cx="${getX(b.x)}" cy="${MID}" r="4" fill="#fbbf24" /><text x="${getX(b.x)}" y="${MID + 20}" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">${d.bep}: ${b.x.toFixed(1)}</text></g>
             `).join('')}
-            <text x="10" y="25" fill="#4ade80" font-size="10" font-weight="900" opacity="0.8">${d.profit}</text>
-            <text x="10" y="${H-15}" fill="#f87171" font-size="10" font-weight="900" opacity="0.8">${d.loss}</text>
+            <text x="10" y="25" fill="#4ade80" font-size="10" font-weight="900" opacity="0.7">${d.profit}</text>
+            <text x="10" y="${H-15}" fill="#f87171" font-size="10" font-weight="900" opacity="0.7">${d.loss}</text>
             <line id="v-line" y1="0" y2="${H}" stroke="white" stroke-dasharray="4" style="display:none" />
         `;
 
@@ -217,7 +201,7 @@
             const item = data.reduce((prev, curr) => Math.abs(getX(curr.x) - mouseX) < Math.abs(getX(prev.x) - mouseX) ? curr : prev);
             vLine.setAttribute('x1', getX(item.x)); vLine.setAttribute('x2', getX(item.x)); vLine.style.display = 'block';
             tooltip.style.display = 'block';
-            let tx = e.clientX - rect.left + 15; if (tx + 120 > rect.width) tx -= 140;
+            let tx = e.clientX - rect.left + 15; if (tx + 150 > rect.width) tx -= 160;
             tooltip.style.left = tx + 'px'; tooltip.style.top = (e.clientY - rect.top - 60) + 'px';
             tooltip.innerHTML = `<b>${d.price}: $${item.x.toFixed(1)}</b><br><span style="color:${item.y>=0?'#4ade80':'#f87171'}">${d.pl}: $${(item.y * 100).toFixed(0)}</span>`;
         };
