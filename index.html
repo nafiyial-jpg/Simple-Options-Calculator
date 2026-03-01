@@ -13,24 +13,21 @@
         .container { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.1); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px; }
         label { display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; }
-        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        input, select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; transition: 0.2s; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
+        button#calcBtn:hover { transform: translateY(-2px); filter: brightness(1.1); }
         #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .data-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .full-card { grid-column: span 2; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 6px; text-transform: uppercase; }
         .data-val { font-size: 18px; font-weight: 800; }
-        #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; cursor: crosshair; }
+        #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; border: 1px solid rgba(255,255,255,0.05); }
         svg { width: 100%; height: 100%; display: block; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; }
-        
-        /* 動畫路徑屬性 */
-        .path-anim {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            animation: drawLine 1.5s ease-out forwards;
-        }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
+        .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--secondary); font-size: 14px; text-align: center; opacity: 0.6; }
     </style>
 </head>
 <body>
@@ -47,7 +44,7 @@
         <div id="boxS2"><label id="ui-s2">Strike 2</label><input type="number" id="s2" value="100"></div>
         <div id="boxS3" style="display:none;"><label id="ui-s3">Strike 3</label><input type="number" id="s3" value="110"></div>
         <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4</label><input type="number" id="s4" value="115"></div>
-        <div><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" value="2"></div>
+        <div><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" value="2.5"></div>
         <div><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105"></div>
     </div>
     <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY</button>
@@ -57,6 +54,7 @@
         <div class="data-card full-card"><span class="data-label" id="ui-prob-label">Strategy Hint</span><div id="res-prob" style="color:var(--primary); font-weight:700;">--</div></div>
     </div>
     <div id="chart-wrapper">
+        <div id="empty-msg" class="empty-state">Click Analyze to view P/L Curve</div>
         <div id="chart-tooltip" class="tooltip"></div>
         <svg id="mainChart"></svg>
     </div>
@@ -64,8 +62,8 @@
 
 <script>
     const i18n = {
-        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", prob: "Strategy Hint", profit: "PROFIT", loss: "LOSS", unlimited: "Unlimited", price_txt: "Price", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" } },
-        zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "最大獲利", maxRisk: "最大風險", prob: "策略特性提示", profit: "獲利區", loss: "虧損區", unlimited: "理論無限", price_txt: "股價", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" } }
+        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", prob: "Strategy Hint", profit: "PROFIT", loss: "LOSS", unlimited: "Unlimited", price_txt: "Price", empty: "Click Analyze to view P/L Curve", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" } },
+        zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "最大獲利", maxRisk: "最大風險", prob: "策略特性提示", profit: "獲利區", loss: "虧損區", unlimited: "理論無限", price_txt: "股價", empty: "點擊一鍵分析以查看圖表", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" } }
     };
 
     let currentLang = 'en';
@@ -76,15 +74,16 @@
         document.getElementById('ui-title').innerText = d.title;
         document.getElementById('ui-strategy-label').innerText = d.strategy;
         document.getElementById('calcBtn').innerText = d.calc;
+        document.getElementById('empty-msg').innerText = d.empty;
         const select = document.getElementById('strategySelect');
         const cur = select.value || 'iron_condor';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
-        updateFields(); runCalculation();
+        updateFields();
     }
 
     function updateFields() {
         const s = document.getElementById('strategySelect').value;
-        document.getElementById('boxS2').style.display = ['long_call','short_call','long_put','short_put','straddle'].includes(s) ? 'none' : 'block';
+        document.getElementById('boxS2').style.display = ['long_call','short_call','long_put','short_put'].includes(s) ? 'none' : 'block';
         document.getElementById('boxS3').style.display = ['butterfly','iron_condor'].includes(s) ? 'block' : 'none';
         document.getElementById('boxS4').style.display = (s === 'iron_condor') ? 'block' : 'none';
     }
@@ -100,36 +99,52 @@
             case 'straddle': return (Math.max(0, p - v1) + Math.max(0, v1 - p)) - prem;
             case 'strangle': return (Math.max(0, v1 - p) + Math.max(0, p - v2)) - prem;
             case 'butterfly': return (Math.max(0, p - v1) - 2 * Math.max(0, p - v2) + Math.max(0, p - v3)) - prem;
-            case 'iron_condor': 
-                let lossPut = Math.max(0, v2 - p) - Math.max(0, v1 - p);
-                let lossCall = Math.max(0, p - v3) - Math.max(0, p - v4);
-                return prem - lossPut - lossCall;
+            case 'iron_condor': return prem - Math.max(0, v2 - p) + Math.max(0, v1 - p) - Math.max(0, p - v3) + Math.max(0, p - v4);
             default: return 0;
         }
     }
 
     function runCalculation() {
+        document.getElementById('empty-msg').style.display = 'none';
         const strategy = document.getElementById('strategySelect').value;
         const v1 = parseFloat(document.getElementById('s1').value), v2 = parseFloat(document.getElementById('s2').value);
         const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
         const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
         
-        const xMin = S * 0.75, xMax = S * 1.25;
-        let data = [];
-        for(let i=0; i<=150; i++) {
-            let p = xMin + (i * (xMax - xMin) / 150);
-            data.push({x: p, y: getP(p, strategy, v1, v2, v3, v4, prem)});
+        let mP = 0, mL = 0, prb = "";
+        const dL = i18n[currentLang];
+        switch(strategy) {
+            case 'long_call': mP = dL.unlimited; mL = prem*100; prb = "Bullish - High Reward/Low Win Rate"; break;
+            case 'short_call': mP = prem*100; mL = dL.unlimited; prb = "Bearish - Limited Income/High Win Rate"; break;
+            case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; prb = "Neutral - High Probability Seller Strategy"; break;
+            case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; prb = "Pin Strategy - High Reward if Target hit"; break;
+            default: mP = dL.unlimited; mL = prem*100; prb = "Standard Option Strategy";
         }
-        drawSVG(data, xMin, xMax, S);
+        document.getElementById('res-max-profit').innerText = typeof mP === 'number' ? `$${mP.toFixed(0)}` : mP;
+        document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
+        document.getElementById('res-prob').innerText = prb;
+
+        const xMin = S * 0.7, xMax = S * 1.3;
+        let data = [];
+        let bePoints = []; // 損益兩平點
+        for(let i=0; i<=200; i++) {
+            let p = xMin + (i * (xMax - xMin) / 200);
+            let y = getP(p, strategy, v1, v2, v3, v4, prem);
+            data.push({x: p, y: y});
+            if (i > 0) {
+                let lastY = data[i-1].y;
+                if ((lastY < 0 && y >= 0) || (lastY > 0 && y <= 0)) bePoints.push(p);
+            }
+        }
+        drawSVG(data, xMin, xMax, S, bePoints);
     }
 
-    function drawSVG(data, xMin, xMax, S) {
+    function drawSVG(data, xMin, xMax, S, bePoints) {
         const svg = document.getElementById('mainChart'), W = 400, H = 360, MID = H/2;
         const getX = (x) => ((x - xMin) / (xMax - xMin)) * W;
-        const maxY = Math.max(...data.map(d => Math.abs(d.y))) * 1.4 || 1;
+        const maxY = Math.max(...data.map(d => Math.abs(d.y))) * 1.5 || 1;
         const getY = (y) => MID - (y / maxY) * (H * 0.4);
 
-        // 找出現價在數組中的索引，作為動畫起點
         const centerIdx = data.findIndex(d => d.x >= S);
         const leftData = data.slice(0, centerIdx + 1).reverse();
         const rightData = data.slice(centerIdx);
@@ -140,24 +155,22 @@
 
         svg.innerHTML = `
             <defs>
-                <clipPath id="clip-profit"><rect x="0" y="0" width="${W}" height="${MID}" /></clipPath>
-                <clipPath id="clip-loss"><rect x="0" y="${MID}" width="${W}" height="${MID}" /></clipPath>
+                <clipPath id="cp-up"><rect x="0" y="0" width="${W}" height="${MID}" /></clipPath>
+                <clipPath id="cp-down"><rect x="0" y="${MID}" width="${W}" height="${MID}" /></clipPath>
             </defs>
-            <!-- 背景區域 -->
-            <rect width="${W}" height="${MID}" fill="rgba(34,197,94,0.05)" />
-            <rect y="${MID}" width="${W}" height="${MID}" fill="rgba(239,68,68,0.05)" />
+            <path d="${fillD}" fill="#22c55e" opacity="0.25" clip-path="url(#cp-up)" />
+            <path d="${fillD}" fill="#ef4444" opacity="0.25" clip-path="url(#cp-down)" />
+            <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1.5" />
             
-            <!-- 損益填滿：嚴格區分顏色 -->
-            <path d="${fillD}" fill="var(--success)" opacity="0.3" clip-path="url(#clip-profit)" />
-            <path d="${fillD}" fill="var(--danger)" opacity="0.3" clip-path="url(#clip-loss)" />
-
-            <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1" />
-            
-            <!-- 中點向兩邊畫的線條 -->
             <path d="${makePath(leftData)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             <path d="${makePath(rightData)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             
-            <line id="v-line" y1="0" y2="${H}" stroke="white" stroke-dasharray="4" style="display:none" />
+            ${bePoints.map(be => `
+                <line x1="${getX(be)}" y1="${MID-15}" x2="${getX(be)}" y2="${MID+15}" stroke="#fbbf24" stroke-width="2" />
+                <text x="${getX(be)}" y="${MID-20}" fill="#fbbf24" font-size="9" text-anchor="middle" font-weight="bold">BE: ${be.toFixed(1)}</text>
+            `).join('')}
+
+            <line id="v-line" y1="0" y2="${H}" stroke="white" stroke-dasharray="4" stroke-opacity="0.6" style="display:none" />
         `;
 
         const vLine = svg.getElementById('v-line'), tooltip = document.getElementById('chart-tooltip');
