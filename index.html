@@ -14,9 +14,15 @@
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; flex-direction: column; align-items: center; }
         .container { background: var(--card); padding: 35px; border-radius: 28px; box-shadow: 0 30px 70px rgba(0,0,0,0.5); width: 100%; max-width: 1000px; border: 1px solid rgba(255,255,255,0.1); }
-        .lang-switch { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 25px; }
-        .lang-btn { background: var(--input-bg); border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 13px; color: var(--text); transition: 0.3s; }
+        
+        /* 語系與分享列佈局 */
+        .top-bar { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 25px; }
+        .lang-btn, .share-btn { background: var(--input-bg); border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 13px; color: var(--text); transition: 0.3s; font-weight: 600; display: flex; align-items: center; gap: 6px; }
         .lang-btn.active { background: var(--primary) !important; color: #000 !important; font-weight: 800; }
+        .share-btn { background: var(--primary); color: #000; }
+        .share-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .share-btn:active { transform: translateY(0); }
+
         h1#ui-title { font-size: 2.2rem; margin: 0 0 10px 0; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-top: 15px; }
         .full-width { grid-column: 1 / -1; }
@@ -46,10 +52,16 @@
 <body>
 
 <main class="container">
-    <div class="lang-switch">
+    <div class="top-bar">
+        <!-- 分享按鈕 -->
+        <button id="shareBtn" class="share-btn" onclick="copyShareLink()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            <span id="ui-share">Copy Link</span>
+        </button>
         <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">English</button>
         <button id="btn-zh" class="lang-btn" onclick="setLanguage('zh')">中文</button>
     </div>
+    
     <h1 id="ui-title">Pro Options Lab</h1>
     <div class="grid">
         <div class="full-width field-group"><label id="ui-strategy">Strategy</label><select id="strategySelect" onchange="handleStrategyChange()"></select></div>
@@ -74,22 +86,33 @@
 <script>
     const i18n = {
         en: { 
-            title: "Pro Options Lab", strategy: "Strategy", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Profit", maxRisk: "Max Risk", probHint: "Logic Hint", calc: "ANALYZE STRATEGY", price: "PRICE", pl: "EST. P/L", bep: "BEP", buy: "BUY", sell: "SELL", low: "Low", mid: "Mid", high: "High", call: "CALL", put: "PUT", unlimited: "Unlimited",
+            title: "Pro Options Lab", strategy: "Strategy", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Profit", maxRisk: "Max Risk", probHint: "Logic Hint", calc: "ANALYZE STRATEGY", price: "PRICE", pl: "EST. P/L", bep: "BEP", buy: "BUY", sell: "SELL", low: "Low", mid: "Mid", high: "High", call: "CALL", put: "PUT", unlimited: "Unlimited", share: "Copy Link", copied: "Copied!",
             opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" },
             hints: { ready: "Ready to Analyze", err: "Logic Error!", bull: "Bullish", bear: "Bearish", neut: "Neutral", vol: "Vol Play" },
-            seo: `<h2>Mastering Your Options Trading with Visual Analysis</h2><p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk before entering a trade. Visualizing your potential profit and loss (P/L) allows you to understand exactly how market movements will impact your portfolio. At Pro Options Lab, we simplify complex derivatives into interactive graphs.</p><h3>Popular Strategies Explained</h3><h4>1. Iron Condor</h4><p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility in the underlying stock. It involves selling a bear call spread and a bull put spread simultaneously. Our visualizer helps you identify the "Profit Zone" between your two short strikes and calculates your break-even points automatically.</p><h4>2. Butterfly Spread</h4><p>A <strong>Butterfly Spread</strong> is a limited-risk, non-directional strategy that combines bull and bear spreads. Traders use our tool to pinpoint the peak profit potential, which occurs when the stock price stays exactly at the middle strike price upon expiration.</p><h4>3. Vertical Spreads (Bull Call & Bear Put)</h4><p>For directional traders, <strong>Bull Call Spreads</strong> and <strong>Bear Put Spreads</strong> are essential for reducing the cost of entry. By visualizing these spreads, you can clearly see the offset between the premium paid and the premium received, defining your absolute Maximum Risk and Maximum Reward.</p><h3>Why Use a P/L Graph?</h3><ul><li><strong>Risk Management:</strong> Know your maximum potential loss before you click "trade".</li><li><strong>Break-Even Points:</strong> Identify the exact stock price needed to start profiting.</li><li><strong>Strategic Planning:</strong> Compare different strike prices to find the optimal risk-to-reward ratio for your market outlook.</li></ul><div class="disclaimer">Disclaimer: Options trading involves significant risk and is not suitable for all investors. Calculations are for educational purposes only and do not constitute financial advice.</div>`
+            seo: `<h2>Mastering Your Options Trading with Visual Analysis</h2><p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk before entering a trade. Visualizing your potential profit and loss (P/L) allows you to understand exactly how market movements will impact your portfolio. At Pro Options Lab, we simplify complex derivatives into interactive graphs.</p><h3>Popular Strategies Explained</h3><h4>1. Iron Condor</h4><p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility in the underlying stock. It involves selling a bear call spread and a bull put spread simultaneously.</p><h4>2. Butterfly Spread</h4><p>A <strong>Butterfly Spread</strong> is a limited-risk, non-directional strategy that combines bull and bear spreads.</p><h4>3. Vertical Spreads (Bull Call & Bear Put)</h4><p>For directional traders, <strong>Bull Call Spreads</strong> and <strong>Bear Put Spreads</strong> are essential for reducing the cost of entry.</p><h3>Why Use a P/L Graph?</h3><ul><li><strong>Risk Management:</strong> Know your maximum potential loss before you click "trade".</li><li><strong>Break-Even Points:</strong> Identify the exact stock price needed to start profiting.</li><li><strong>Strategic Planning:</strong> Compare different strike prices to find the optimal risk-to-reward ratio for your market outlook.</li></ul><div class="disclaimer">Disclaimer: Options trading involves significant risk and is not suitable for all investors. Calculations are for educational purposes only and do not constitute financial advice.</div>`
         },
         zh: { 
-            title: "專業期權分析實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "一鍵分析策略損益", price: "標的價格", pl: "預計損益", bep: "損益平衡點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制",
+            title: "專業期權分析實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "一鍵分析策略損益", price: "標的價格", pl: "預計損益", bep: "損益平衡點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制", share: "複製分享連結", copied: "已複製！",
             opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" },
-            hints: { ready: "設定正確，請點擊分析", err: "價格排序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "做多波動率" },
-            seo: `<h2>透過視覺化圖表掌握您的期權交易</h2><p>在進入交易前，使用<strong>期權損益計算機</strong>是管理風險最有效的方式。視覺化您的潛在獲利與虧損 (P/L)，能讓您精確理解市場波動對部位的影響。在 Pro Options Lab，我們將複雜的衍生品簡化為互動式圖表。</p><h3>熱門策略解析</h3><h4>1. 鐵鷹策略 (Iron Condor)</h4><p><strong>鐵鷹策略</strong>是一種中性策略，旨在從標的股票的低波動中獲利。它涉及同時賣出熊市看漲價差和牛市看跌價差。我們的視覺化工具可幫助您識別兩個空頭執行價之間的「獲利區間」，並自動計算損益平衡點。</p><h4>2. 蝴蝶價差 (Butterfly Spread)</h4><p><strong>蝴蝶價差</strong>是一種風險有限、非方向性的策略，結合了牛市和熊市價差。交易者使用我們的工具來精確鎖定最大獲利潛力，這發生在股價於到期時正好停留在中間執行價時。</p><h4>3. 垂直價差 (牛市買權 & 熊市賣權)</h4><p>對於方向性交易者來說，<strong>牛市買權價差</strong>和<strong>熊市賣權價差</strong>對於降低入場成本至關重要。透過視覺化這些價差，您可以清楚地看到支付的權利金與收到的權利金之間的抵銷，從而定義您的絕對最大風險和最大回報。</p><h3>為什麼要使用損益圖表？</h3><ul><li><strong>風險管理：</strong>在點擊「交易」之前了解您的最大潛在損失。</li><li><strong>損益平衡點：</strong>識別開始獲利所需的確切股價。</li><li><strong>策略規劃：</strong>比較不同的執行價格，針對您的市場前景找到最佳的風險回報比。</li></ul><div class="disclaimer">免責聲明：期權交易涉及重大風險，並不適合所有投資者。所提供的計算僅供教學參考，不構成財務建議。</div>`
+            hints: { ready: "設定正確，請點擊分析", err: "順序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "做多波動率" },
+            seo: `<h2>透過視覺化圖表掌握您的期權交易</h2><p>在進入交易前，使用<strong>期權損益計算機</strong>是管理風險最有效的方式。視覺化您的潛在獲利與虧損 (P/L)，能讓您精確理解市場波動對部位的影響。</p><h3>熱門策略解析</h3><h4>1. 鐵鷹策略 (Iron Condor)</h4><p><strong>鐵鷹策略</strong>是一種中性策略，旨在從標的股票的低波動中獲利。它涉及同時賣出熊市看漲價差和牛市看跌價差。</p><h4>2. 蝴蝶價差 (Butterfly Spread)</h4><p><strong>蝴蝶價差</strong>是一種風險有限、非方向性的策略，結合了牛市和熊市價差。</p><h4>3. 垂直價差 (牛市買權 & 熊市賣權)</h4><p>對於方向性交易者來說，<strong>牛市買權價差</strong>和<strong>熊市賣權價差</strong>對於降低入場成本至關重要。</p><h3>為什麼要使用損益圖表？</h3><ul><li><strong>風險管理：</strong>在交易前了解您的最大潛在損失。</li><li><strong>損益平衡點：</strong>識別開始獲利所需的確切股價。</li><li><strong>策略規劃：</strong>比較不同的執行價格找到最佳回報比。</li></ul><div class="disclaimer">免責聲明：期權交易涉及重大風險，並不適合所有投資者。所提供的計算僅供教學參考，不構成財務建議。</div>`
         }
     };
 
     let currentLang = 'en', isCalculated = false;
 
-    // 更新 URL 參數
+    // 分享連結功能
+    function copyShareLink() {
+        syncUrlParams(); // 確保網址參數是最新的
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            const btnText = document.querySelector('#shareBtn span');
+            const originalText = i18n[currentLang].share;
+            btnText.innerText = i18n[currentLang].copied;
+            setTimeout(() => { btnText.innerText = originalText; }, 2000);
+        });
+    }
+
     function syncUrlParams() {
         try {
             const params = new URLSearchParams();
@@ -98,13 +121,12 @@
             if(sEl) params.set('strategy', sEl.value);
             ['s1', 's2', 's3', 's4', 'premium', 'target'].forEach(id => {
                 const el = document.getElementById(id);
-                if(el) params.set(id, el.value);
+                if(el && el.value) params.set(id, el.value);
             });
             window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
         } catch(e) {}
     }
 
-    // 從 URL 加載參數
     function loadParamsFromUrl() {
         try {
             const params = new URLSearchParams(window.location.search);
@@ -120,7 +142,6 @@
                 }
             });
             updateFields(); updateTags();
-            // 如果 URL 有參數，自動執行分析
             if(params.has('strategy')) runCalculation();
         } catch(e) {}
     }
@@ -197,9 +218,9 @@
             case 'bear_put': return (Math.max(0, v[1] - p) - Math.max(0, v[0] - p)) - prem;
             case 'butterfly': return (Math.max(0, p - v[0]) - 2 * Math.max(0, p - v[1]) + Math.max(0, p - v[2])) - prem;
             case 'iron_condor': 
-                const putLoss = Math.max(0, v[1] - p) - Math.max(0, v[0] - p);
-                const callLoss = Math.max(0, p - v[2]) - Math.max(0, p - v[3]);
-                return prem - (putLoss + callLoss);
+                const putSpread = Math.max(0, v[1] - p) - Math.max(0, v[0] - p);
+                const callSpread = Math.max(0, p - v[2]) - Math.max(0, p - v[3]);
+                return prem - (putSpread + callSpread);
             default: return 0;
         }
     }
@@ -210,10 +231,7 @@
         const s = document.getElementById('strategySelect').value;
         const v = [1,2,3,4].map(i => parseFloat(document.getElementById('s'+i).value) || 0);
         const prem = parseFloat(document.getElementById('premium').value) || 0, S = parseFloat(document.getElementById('target').value) || 0, d = i18n[currentLang];
-        
-        // 修正點：點擊分析後立即同步 URL
         syncUrlParams();
-
         let mP = 0, mL = 0, h = d.hints.neut;
         if(s.includes('call') && s!=='iron_condor') h = d.hints.bull; else if(s.includes('put') && s!=='iron_condor') h = d.hints.bear;
         switch(s) {
@@ -226,7 +244,6 @@
         document.getElementById('res-max-profit').innerText = (typeof mP === 'number') ? `$${mP.toFixed(0)}` : mP;
         document.getElementById('res-max-loss').innerText = (typeof mL === 'number') ? `$${mL.toFixed(0)}` : mL;
         document.getElementById('res-prob').innerText = h;
-        
         let center = (v[0]+(v[3]||v[2]||v[1]||v[0]))/2;
         const range = Math.max(Math.abs(center-v[0]), Math.abs(center-S), 50) * 1.8;
         const xMin = Math.max(0, center - range), xMax = center + range;
@@ -266,23 +283,4 @@
 
     function setLanguage(lang) {
         currentLang = lang; const d = i18n[lang];
-        document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
-        document.getElementById('btn-zh').className = 'lang-btn' + (lang==='zh'?' active':'');
-        ['strategy','s1','s2','s3','s4','premium','target','maxReward','maxRisk','probHint'].forEach(id => {
-            const el = document.getElementById('ui-'+id); if(el) el.innerText = d[id];
-        });
-        document.getElementById('calcBtn').innerText = d.calc;
-        document.getElementById('seo-article').innerHTML = d.seo;
-        const select = document.getElementById('strategySelect');
-        if(select) {
-            const cur = select.value || 'long_call';
-            select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
-            updateDynamicSEO(d.opt[cur]);
-        }
-        updateTags(); validateLogic();
-        if(isCalculated) runCalculation();
-    }
-    window.onload = () => { setLanguage('en'); updateFields(); loadParamsFromUrl(); };
-</script>
-</body>
-</html>
+        document.getElementById('btn-en').className = 'lang-btn' + (lang==='
