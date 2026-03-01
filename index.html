@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Options Lab | 專業期權策略模擬器 2026</title>
+    <title>Pro Options Lab | Professional Strategy Simulator 2026</title>
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
-            --success: #4ade80; --danger: #f87171; --warning: #fbbf24; --text: #f1f5f9; --input-bg: #334155;
+            --success: #22c55e; --danger: #ef4444; --warning: #fbbf24; --text: #f1f5f9; --input-bg: #334155;
         }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         .container { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.1); }
-        .how-to-use { background: rgba(56, 189, 248, 0.1); padding: 12px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--primary); font-size: 13px; color: var(--secondary); }
         .lang-switch { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
         .lang-btn { background: var(--input-bg); border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text); }
         .lang-btn.active { background: var(--primary); color: #000; font-weight: 700; }
@@ -20,21 +19,19 @@
         label { display: block; font-size: 10px; font-weight: 800; margin-bottom: 4px; color: var(--secondary); text-transform: uppercase; }
         input, select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; }
         button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; transition: 0.2s; }
-        #greeks-panel { margin-top: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .greek-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
-        .greek-label { font-size: 10px; color: var(--secondary); display: block; }
-        .greek-val { font-size: 14px; font-weight: 700; color: var(--primary); }
+        
+        #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .data-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .full-card { grid-column: span 2; }
+        .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .data-val { font-size: 18px; font-weight: 800; }
+
         #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; cursor: crosshair; }
         svg { width: 100%; height: 100%; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.95); padding: 10px; border-radius: 8px; font-size: 12px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        .ad-banner { width: 100%; max-width: 600px; min-height: 90px; margin: 20px 0; background: var(--input-bg); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 12px; border: 1px dashed rgba(255,255,255,0.1); }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.95); padding: 12px; border-radius: 8px; font-size: 12px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
-
-<div class="ad-banner">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX" data-ad-format="auto" data-full-width-responsive="true"></ins>
-</div>
 
 <div class="container">
     <div class="lang-switch">
@@ -43,7 +40,6 @@
     </div>
 
     <h1 id="ui-title">Pro Options Lab</h1>
-    <div class="how-to-use" id="ui-hint">💡 提示：滑動圖表查看不同價格點的損益。</div>
 
     <div class="grid">
         <div style="grid-column: span 2;">
@@ -54,19 +50,25 @@
         <div id="boxS2"><label id="ui-s2">Strike 2</label><input type="number" id="s2" value="110"></div>
         <div id="boxS3" style="display:none;"><label id="ui-s3">Strike 3</label><input type="number" id="s3" value="120"></div>
         <div id="boxS4" style="display:none;"><label id="ui-s4">Strike 4</label><input type="number" id="s4" value="130"></div>
-        <div><label id="ui-vol">IV (%)</label><input type="number" id="vol" value="25"></div>
-        <div><label id="ui-days">Days</label><input type="number" id="days" value="30"></div>
         <div><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" value="5"></div>
         <div><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105"></div>
     </div>
 
     <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY</button>
 
-    <div id="greeks-panel">
-        <div class="greek-card"><span class="greek-label">Delta</span><span id="gk-delta" class="greek-val">--</span></div>
-        <div class="greek-card"><span class="greek-label">Gamma</span><span id="gk-gamma" class="greek-val">--</span></div>
-        <div class="greek-card"><span class="greek-label">Theta</span><span id="gk-theta" class="greek-val">--</span></div>
-        <div class="greek-card"><span class="greek-label">Vega</span><span id="gk-vega" class="greek-val">--</span></div>
+    <div id="summary-panel">
+        <div class="data-card">
+            <span class="data-label" id="ui-max-reward-label">Max Reward</span>
+            <span id="res-max-profit" class="data-val" style="color:var(--success)">--</span>
+        </div>
+        <div class="data-card">
+            <span class="data-label" id="ui-max-risk-label">Max Risk</span>
+            <span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span>
+        </div>
+        <div class="data-card full-card">
+            <span class="data-label" id="ui-prob-label">Market Strategy Hint</span>
+            <div id="res-prob" style="color:var(--primary); font-weight:700; font-size: 14px;">--</div>
+        </div>
     </div>
 
     <div id="chart-wrapper">
@@ -79,32 +81,32 @@
 (function() {
     const i18n = {
         en: { 
-            title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", hint: "💡 Hover chart for P/L & ROI details.",
-            s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4",
-            vol: "IV (%)", days: "Days", premium: "Net Prem ($)", target: "Spot ($)",
-            profit: "PROFIT", loss: "LOSS",
-            opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
+            title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY",
+            s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)",
+            maxReward: "Max Reward", maxRisk: "Max Risk", prob: "Strategy Hint",
+            profit: "PROFIT", loss: "LOSS", unlimited: "Unlimited", price_txt: "Price",
+            probHigh: "High Win Rate / Low Reward (Seller)", probLow: "Low Win Rate / High Reward (Buyer)", probMid: "Neutral Probability",
+            opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", straddle: "Straddle", strangle: "Strangle", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }
         },
         zh: { 
-            title: "專業期權實驗室", strategy: "選擇交易策略", calc: "一鍵分析策略", hint: "💡 提示：滑鼠移至圖表可查看各價位即時損益。",
-            s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4",
-            vol: "隱含波動率 (%)", days: "到期天數", premium: "權利金淨額", target: "目前股價",
-            profit: "獲利區", loss: "虧損區",
-            opt: { long_call: "買入買權 (Long Call)", short_call: "賣出買權 (Short Call)", long_put: "買入賣權 (Long Put)", short_put: "賣出賣權 (Short Put)", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
+            title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略",
+            s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價",
+            maxReward: "理論最大獲利", maxRisk: "理論最大風險", prob: "策略特性提示",
+            profit: "獲利區", loss: "虧損區", unlimited: "理論無限", price_txt: "股價",
+            probHigh: "高勝率 / 低回報 (賣方策略)", probLow: "低勝率 / 高回報 (買方策略)", probMid: "勝率中性 (波動率策略)",
+            opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", straddle: "跨式組合", strangle: "勒式組合", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }
         }
     };
 
-    let currentLang = 'en', lastData = [];
+    let currentLang = 'en'; // 預設語系改為英文
 
-    // --- 補回：欄位顯示邏輯 ---
     window.updateFields = function() {
         const s = document.getElementById('strategySelect').value;
-        document.getElementById('boxS2').style.display = ['bull_call','bear_put','butterfly','iron_condor'].includes(s) ? 'block' : 'none';
+        document.getElementById('boxS2').style.display = ['bull_call','bear_put','strangle','butterfly','iron_condor'].includes(s) ? 'block' : 'none';
         document.getElementById('boxS3').style.display = ['butterfly','iron_condor'].includes(s) ? 'block' : 'none';
         document.getElementById('boxS4').style.display = (s === 'iron_condor') ? 'block' : 'none';
     };
 
-    // --- 補回：全策略損益計算 ---
     function getP(p, s, v1, v2, v3, v4, prem) {
         switch(s) {
             case 'long_call': return Math.max(0, p - v1) - prem;
@@ -114,6 +116,7 @@
             case 'bull_call': return (Math.max(0, p - v1) - Math.max(0, p - v2)) - prem;
             case 'bear_put': return (Math.max(0, v2 - p) - Math.max(0, v1 - p)) - prem;
             case 'straddle': return (Math.max(0, p - v1) + Math.max(0, v1 - p)) - prem;
+            case 'strangle': return (Math.max(0, v1 - p) + Math.max(0, p - v2)) - prem;
             case 'butterfly': return (Math.max(0, p - v1) - 2 * Math.max(0, p - v2) + Math.max(0, p - v3)) - prem;
             case 'iron_condor': return prem - (Math.max(0, v1 - p) - Math.max(0, v2 - p) + Math.max(0, p - v4) - Math.max(0, p - v3));
             default: return 0;
@@ -127,84 +130,82 @@
         document.getElementById('ui-title').innerText = d.title;
         document.getElementById('ui-strategy-label').innerText = d.strategy;
         document.getElementById('calcBtn').innerText = d.calc;
-        document.getElementById('ui-s1').innerText = d.s1;
-        document.getElementById('ui-s2').innerText = d.s2;
-        document.getElementById('ui-s3').innerText = d.s3;
-        document.getElementById('ui-s4').innerText = d.s4;
-        document.getElementById('ui-vol').innerText = d.vol;
-        document.getElementById('ui-days').innerText = d.days;
-        document.getElementById('ui-premium').innerText = d.premium;
-        document.getElementById('ui-target').innerText = d.target;
-        
+        document.getElementById('ui-s1').innerText = d.s1; document.getElementById('ui-s2').innerText = d.s2;
+        document.getElementById('ui-s3').innerText = d.s3; document.getElementById('ui-s4').innerText = d.s4;
+        document.getElementById('ui-premium').innerText = d.premium; document.getElementById('ui-target').innerText = d.target;
+        document.getElementById('ui-max-reward-label').innerText = d.maxReward;
+        document.getElementById('ui-max-risk-label').innerText = d.maxRisk;
+        document.getElementById('ui-prob-label').innerText = d.prob;
         const select = document.getElementById('strategySelect');
         const currentVal = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k === currentVal ? 'selected' : ''}>${v}</option>`).join('');
-        updateFields();
-        runCalculation();
+        updateFields(); runCalculation();
     }
 
     window.runCalculation = function() {
-        const S = parseFloat(document.getElementById('target').value);
         const strategy = document.getElementById('strategySelect').value;
         const v1 = parseFloat(document.getElementById('s1').value), v2 = parseFloat(document.getElementById('s2').value);
         const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
-        const prem = parseFloat(document.getElementById('premium').value);
+        const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
         
-        // 模擬 Greeks (可用 Black-Scholes 擴充)
-        document.getElementById('gk-delta').innerText = (Math.random() * 0.8).toFixed(2);
-        document.getElementById('gk-theta').innerText = (-Math.random() * 5).toFixed(2);
+        let mP = 0, mL = 0, prb = "";
+        const dL = i18n[currentLang];
+        switch(strategy) {
+            case 'long_call': mP = dL.unlimited; mL = prem*100; prb = dL.probLow; break;
+            case 'short_call': mP = prem*100; mL = dL.unlimited; prb = dL.probHigh; break;
+            case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; prb = dL.probHigh; break;
+            default: mP = dL.unlimited; mL = prem*100; prb = dL.probMid;
+        }
+        document.getElementById('res-max-profit').innerText = typeof mP === 'number' ? `$${mP.toFixed(0)}` : mP;
+        document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
+        document.getElementById('res-prob').innerText = prb;
 
         const xMin = S * 0.85, xMax = S * 1.15;
-        lastData = [];
+        let data = [];
         for(let i=0; i<=100; i++) {
             let p = xMin + (i * (xMax - xMin) / 100);
-            let pnlExp = getP(p, strategy, v1, v2, v3, v4, prem);
-            lastData.push({x: p, y: pnlExp});
+            data.push({x: p, y: getP(p, strategy, v1, v2, v3, v4, prem)});
         }
-        drawSVG(lastData, xMin, xMax, S);
+        drawSVG(data, xMin, xMax);
     };
 
-    function drawSVG(data, xMin, xMax, S) {
+    function drawSVG(data, xMin, xMax) {
         const svg = document.getElementById('mainChart'), W = 400, H = 360, MID = H/2;
         const getX = (x) => ((x - xMin) / (xMax - xMin)) * W;
         const maxY = Math.max(...data.map(d => Math.abs(d.y))) * 1.4 || 1;
-        const getY = (y) => MID - (y / maxY) * (H * 0.4);
+        const getY = (y) => MID - (y / maxY) * (H * 0.42);
 
         let dStr = `M ${getX(data[0].x)} ${getY(data[0].y)}`;
         data.slice(1).forEach(p => dStr += ` L ${getX(p.x)} ${getY(p.y)}`);
 
         svg.innerHTML = `
-            <rect width="${W}" height="${MID}" fill="rgba(74,222,128,0.05)" />
-            <rect y="${MID}" width="${W}" height="${MID}" fill="rgba(248,113,113,0.05)" />
-            <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#334155" />
+            <rect width="${W}" height="${MID}" fill="rgba(34,197,94,0.18)" />
+            <rect y="${MID}" width="${W}" height="${MID}" fill="rgba(239,68,68,0.18)" />
+            <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1.5" />
             <path d="${dStr}" fill="none" stroke="#38bdf8" stroke-width="3" />
-            <line id="v-line" x1="0" y1="0" x2="0" y2="${H}" stroke="white" stroke-opacity="0.5" style="display:none" />
-            <circle id="v-dot" r="4" fill="white" style="display:none" />
-            <text x="10" y="30" fill="#4ade80" font-size="12" font-weight="bold">${i18n[currentLang].profit}</text>
-            <text x="10" y="${H-20}" fill="#f87171" font-size="12" font-weight="bold">${i18n[currentLang].loss}</text>
+            <line id="v-line" x1="0" y1="0" x2="0" y2="${H}" stroke="white" stroke-opacity="0.6" style="display:none" />
+            <text x="10" y="30" fill="#4ade80" font-size="12" font-weight="900">▲ ${i18n[currentLang].profit}</text>
+            <text x="10" y="${H-20}" fill="#f87171" font-size="12" font-weight="900">▼ ${i18n[currentLang].loss}</text>
         `;
 
-        const vLine = svg.getElementById('v-line'), vDot = svg.getElementById('v-dot'), tooltip = document.getElementById('chart-tooltip');
+        const vLine = svg.getElementById('v-line'), tooltip = document.getElementById('chart-tooltip');
         svg.onmousemove = (e) => {
             const rect = svg.getBoundingClientRect();
             const mouseX = (e.clientX - rect.left) * (W / rect.width);
             const item = data.reduce((prev, curr) => Math.abs(getX(curr.x) - mouseX) < Math.abs(getX(prev.x) - mouseX) ? curr : prev);
-            
             vLine.setAttribute('x1', getX(item.x)); vLine.setAttribute('x2', getX(item.x)); vLine.style.display = 'block';
-            vDot.setAttribute('cx', getX(item.x)); vDot.setAttribute('cy', getY(item.y)); vDot.style.display = 'block';
-            tooltip.style.display = 'block'; tooltip.style.left = (e.clientX - rect.left + 15) + 'px'; tooltip.style.top = (e.clientY - rect.top - 50) + 'px';
-            tooltip.innerHTML = `股價: $${item.x.toFixed(1)}<br><b>損益: $${(item.y * 100).toFixed(0)}</b><br>ROI: ${(item.y/5*100).toFixed(1)}%`;
+            tooltip.style.display = 'block'; tooltip.style.left = (e.clientX - rect.left + 15) + 'px'; tooltip.style.top = (e.clientY - rect.top - 60) + 'px';
+            tooltip.innerHTML = `${i18n[currentLang].price_txt}: $${item.x.toFixed(1)}<br><b style="color:${item.y>=0?'#4ade80':'#f87171'}">P/L: $${(item.y * 100).toFixed(0)}</b>`;
         };
-        svg.onmouseleave = () => { vLine.style.display = vDot.style.display = tooltip.style.display = 'none'; };
+        svg.onmouseleave = () => { vLine.style.display = tooltip.style.display = 'none'; };
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
         document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
-        setLanguage('zh');
+        setLanguage('en'); // 初始化預設為英文
     });
 })();
 </script>
-<script async src="https://pagead2.googlesyndication.com" crossorigin="anonymous"></script>
 </body>
 </html>
