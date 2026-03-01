@@ -82,13 +82,14 @@
         zh: { 
             title: "專業期權分析實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "一鍵分析策略損益", price: "標的價格", pl: "預計損益", bep: "損益平衡點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制",
             opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" },
-            hints: { ready: "設定正確，請點擊分析", err: "順序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "做多波動率" },
+            hints: { ready: "設定正確，請點擊分析", err: "價格排序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "做多波動率" },
             seo: `<h2>透過視覺化圖表掌握您的期權交易</h2><p>在進入交易前，使用<strong>期權損益計算機</strong>是管理風險最有效的方式。視覺化您的潛在獲利與虧損 (P/L)，能讓您精確理解市場波動對部位的影響。在 Pro Options Lab，我們將複雜的衍生品簡化為互動式圖表。</p><h3>熱門策略解析</h3><h4>1. 鐵鷹策略 (Iron Condor)</h4><p><strong>鐵鷹策略</strong>是一種中性策略，旨在從標的股票的低波動中獲利。它涉及同時賣出熊市看漲價差和牛市看跌價差。我們的視覺化工具可幫助您識別兩個空頭執行價之間的「獲利區間」，並自動計算損益平衡點。</p><h4>2. 蝴蝶價差 (Butterfly Spread)</h4><p><strong>蝴蝶價差</strong>是一種風險有限、非方向性的策略，結合了牛市和熊市價差。交易者使用我們的工具來精確鎖定最大獲利潛力，這發生在股價於到期時正好停留在中間執行價時。</p><h4>3. 垂直價差 (牛市買權 & 熊市賣權)</h4><p>對於方向性交易者來說，<strong>牛市買權價差</strong>和<strong>熊市賣權價差</strong>對於降低入場成本至關重要。透過視覺化這些價差，您可以清楚地看到支付的權利金與收到的權利金之間的抵銷，從而定義您的絕對最大風險和最大回報。</p><h3>為什麼要使用損益圖表？</h3><ul><li><strong>風險管理：</strong>在點擊「交易」之前了解您的最大潛在損失。</li><li><strong>損益平衡點：</strong>識別開始獲利所需的確切股價。</li><li><strong>策略規劃：</strong>比較不同的執行價格，針對您的市場前景找到最佳的風險回報比。</li></ul><div class="disclaimer">免責聲明：期權交易涉及重大風險，並不適合所有投資者。所提供的計算僅供教學參考，不構成財務建議。</div>`
         }
     };
 
     let currentLang = 'en', isCalculated = false;
 
+    // 更新 URL 參數
     function syncUrlParams() {
         try {
             const params = new URLSearchParams();
@@ -103,6 +104,7 @@
         } catch(e) {}
     }
 
+    // 從 URL 加載參數
     function loadParamsFromUrl() {
         try {
             const params = new URLSearchParams(window.location.search);
@@ -118,6 +120,7 @@
                 }
             });
             updateFields(); updateTags();
+            // 如果 URL 有參數，自動執行分析
             if(params.has('strategy')) runCalculation();
         } catch(e) {}
     }
@@ -207,6 +210,10 @@
         const s = document.getElementById('strategySelect').value;
         const v = [1,2,3,4].map(i => parseFloat(document.getElementById('s'+i).value) || 0);
         const prem = parseFloat(document.getElementById('premium').value) || 0, S = parseFloat(document.getElementById('target').value) || 0, d = i18n[currentLang];
+        
+        // 修正點：點擊分析後立即同步 URL
+        syncUrlParams();
+
         let mP = 0, mL = 0, h = d.hints.neut;
         if(s.includes('call') && s!=='iron_condor') h = d.hints.bull; else if(s.includes('put') && s!=='iron_condor') h = d.hints.bear;
         switch(s) {
@@ -219,6 +226,7 @@
         document.getElementById('res-max-profit').innerText = (typeof mP === 'number') ? `$${mP.toFixed(0)}` : mP;
         document.getElementById('res-max-loss').innerText = (typeof mL === 'number') ? `$${mL.toFixed(0)}` : mL;
         document.getElementById('res-prob').innerText = h;
+        
         let center = (v[0]+(v[3]||v[2]||v[1]||v[0]))/2;
         const range = Math.max(Math.abs(center-v[0]), Math.abs(center-S), 50) * 1.8;
         const xMin = Math.max(0, center - range), xMax = center + range;
