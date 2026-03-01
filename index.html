@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,12 +35,15 @@
         button#calcBtn:disabled { opacity: 0.15; cursor: not-allowed; }
         
         #summary-panel { margin-top: 35px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .data-card { background: rgba(255,255,255,0.02); padding: 22px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .data-card { background: rgba(255,255,255,0.02); padding: 22px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; position: relative; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; text-transform: uppercase; }
         .data-val { font-size: 20px; font-weight: 900; }
         
-        #chart-wrapper { position: relative; margin-top: 35px; background: #000; border-radius: 24px; height: 400px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; cursor: crosshair; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 15px; border-radius: 12px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* 廣告欄位修正 */
+        .ad-container { grid-column: span 3; background: repeating-linear-gradient(45deg, #1e293b, #1e293b 10px, #25334a 10px, #25334a 20px); height: 90px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 12px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 20px; }
+
+        #chart-wrapper { position: relative; margin-top: 35px; background: #000; border-radius: 24px; height: 400px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 15px; border-radius: 12px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
     </style>
 </head>
 <body>
@@ -61,12 +64,19 @@
         <div class="field-group"><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105" oninput="handleInputChange()"></div>
     </div>
     <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY</button>
+    
     <div id="summary-panel">
         <div class="data-card"><span class="data-label" id="ui-maxReward">Max Profit</span><span id="res-max-profit" class="data-val" style="color:var(--success)">--</span></div>
         <div class="data-card"><span class="data-label" id="ui-maxRisk">Max Risk</span><span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span></div>
         <div class="data-card" id="hint-card"><span class="data-label" id="ui-probHint">Logic Hint</span><span id="res-prob" class="data-val" style="color:var(--primary); font-size:12px;">--</span></div>
+        <!-- 廣告欄位 Ad Slot -->
+        <div class="ad-container" id="ad-slot">Google Ad Slot - Placement Reserved</div>
     </div>
-    <div id="chart-wrapper"><div id="chart-tooltip" class="tooltip" style="display:none;"></div><svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="none"></svg></div>
+
+    <div id="chart-wrapper">
+        <div id="chart-tooltip" class="tooltip"></div>
+        <svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="none"></svg>
+    </div>
 </div>
 
 <script>
@@ -86,7 +96,7 @@
     function updateFields() {
         const s = document.getElementById('strategySelect').value || 'long_call';
         const boxes = ['boxS2','boxS3','boxS4'];
-        boxes.forEach(id => { document.getElementById(id).style.display = 'none'; });
+        boxes.forEach(id => document.getElementById(id).style.display = 'none');
         if(!['long_call','short_call','long_put','short_put'].includes(s)) document.getElementById('boxS2').style.display = 'flex';
         if(['butterfly','iron_condor'].includes(s)) document.getElementById('boxS3').style.display = 'flex';
         if(s === 'iron_condor') document.getElementById('boxS4').style.display = 'flex';
@@ -143,6 +153,7 @@
         document.getElementById('mainChart').innerHTML = ''; 
     }
 
+    // 鐵鷹與蝴蝶策略損益邏輯核心修正
     function getP(p, s, v, prem) {
         switch(s) {
             case 'long_call': return Math.max(0, p - v[0]) - prem;
@@ -152,7 +163,11 @@
             case 'bull_call': return (Math.max(0, p - v[0]) - Math.max(0, p - v[1])) - prem;
             case 'bear_put': return (Math.max(0, v[1] - p) - Math.max(0, v[0] - p)) - prem;
             case 'butterfly': return (Math.max(0, p - v[0]) - 2 * Math.max(0, p - v[1]) + Math.max(0, p - v[2])) - prem;
-            case 'iron_condor': return (Math.max(0, v[1] - p) - Math.max(0, v[0] - p)) + (Math.max(0, p - v[2]) - Math.max(0, p - v[3])) + prem;
+            case 'iron_condor': 
+                // 賣出的 Put (v1) 與 Call (v2) 之間獲利最大
+                const putProfit = Math.max(0, v[1] - p) - Math.max(0, v[0] - p); // 賣高Put 買低Put (Credit Spread)
+                const callProfit = Math.max(0, p - v[2]) - Math.max(0, p - v[3]); // 賣低Call 買高Call (Credit Spread)
+                return prem - (putProfit + callProfit);
             default: return 0;
         }
     }
@@ -204,12 +219,22 @@
             ${beps.map(b => `<g><circle cx="${getX(b.x)}" cy="${MID}" r="5" fill="#fbbf24"/><text x="${getX(b.x)}" y="${MID+22}" fill="#fbbf24" font-size="11" font-weight="900" text-anchor="middle">${d.bep} ${b.x.toFixed(1)}</text></g>`).join('')}
         `;
         svg.onmousemove = (e) => {
-            const rect = svg.getBoundingClientRect(), mx = (e.clientX - rect.left) * (W / rect.width), tt = document.getElementById('chart-tooltip');
-            const item = data.reduce((a, b) => Math.abs(getX(b.x)-mx) < Math.abs(getX(a.x)-mx) ? b : a);
-            tt.style.display = 'block'; tt.style.left = (e.clientX - rect.left + 20) + 'px'; tt.style.top = (e.clientY - rect.top - 70) + 'px';
+            if(!isCalculated) return;
+            const rect = svg.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left) * (W / rect.width);
+            const item = data.reduce((a, b) => Math.abs(getX(b.x)-mouseX) < Math.abs(getX(a.x)-mouseX) ? b : a);
+            const tt = document.getElementById('chart-tooltip');
+            tt.style.display = 'block';
+
+            // Tooltip 換向邏輯 (偵測右邊界)
+            let tx = e.clientX - rect.left + 20;
+            if (tx + 180 > rect.width) tx = e.clientX - rect.left - 190;
+            
+            tt.style.left = tx + 'px';
+            tt.style.top = (e.clientY - rect.top - 70) + 'px';
             tt.innerHTML = `<div style="color:var(--secondary); font-size:10px;">${d.price}</div><b style="font-size:15px;">$${item.x.toFixed(2)}</b><hr style="border:0; border-top:1px solid #334155; margin:8px 0;"><div style="color:var(--secondary); font-size:10px;">${d.pl}</div><b style="color:${item.y>=0?'var(--success)':'var(--danger)'}; font-size:15px;">$${(item.y*100).toFixed(0)}</b>`;
         };
-        svg.onmouseleave = () => { hideTooltip(); };
+        svg.onmouseleave = hideTooltip;
     }
 
     function setLanguage(lang) {
@@ -228,7 +253,7 @@
         if(isCalculated) runCalculation();
     }
 
-    window.onload = () => { setLanguage('zh'); updateFields(); };
+    window.onload = () => { setLanguage('en'); updateFields(); };
 </script>
 </body>
 </html>
