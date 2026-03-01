@@ -22,10 +22,11 @@
         .data-card { background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .full-card { grid-column: span 2; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 6px; text-transform: uppercase; }
+        .data-val { font-size: 18px; font-weight: 800; }
         #chart-wrapper { position: relative; margin-top: 20px; background: #000; border-radius: 14px; overflow: hidden; height: 360px; border: 1px solid rgba(255,255,255,0.05); }
         svg { width: 100%; height: 100%; display: block; }
         .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 10px; border-radius: 6px; font-size: 11px; color: white; pointer-events: none; display: none; border: 1px solid var(--primary); z-index: 1000; }
-        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .path-anim { stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: drawLine 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes drawLine { to { stroke-dashoffset: 0; } }
         .empty-state { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--secondary); font-size: 14px; opacity: 0.5; }
     </style>
@@ -51,7 +52,7 @@
     <div id="summary-panel">
         <div class="data-card"><span class="data-label" id="ui-max-reward-label">Max Reward</span><span id="res-max-profit" class="data-val" style="color:var(--success)">--</span></div>
         <div class="data-card"><span class="data-label" id="ui-max-risk-label">Max Risk</span><span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span></div>
-        <div class="data-card full-card"><div id="res-prob" style="color:var(--primary); font-weight:700; font-size:13px;">--</div></div>
+        <div class="data-card full-card"><div id="res-prob" style="color:var(--primary); font-weight:700; font-size:13px; text-align: center;">--</div></div>
     </div>
     <div id="chart-wrapper">
         <div id="empty-msg" class="empty-state">Click Analyze to view P/L Curve</div>
@@ -62,8 +63,8 @@
 
 <script>
     const i18n = {
-        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", profit: "PROFIT", loss: "LOSS", empty: "Click Analyze to view P/L Curve", price: "Price", bep: "BEP", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" } },
-        zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "理論最大獲利", maxRisk: "理論最大風險", profit: "獲利區", loss: "虧損區", empty: "點擊按鈕生成損益圖表", price: "股價", bep: "兩平點", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" } }
+        en: { title: "Pro Options Lab", strategy: "Strategy", calc: "ANALYZE STRATEGY", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Reward", maxRisk: "Max Risk", profit: "PROFIT", loss: "LOSS", empty: "Click Analyze to view P/L Curve", price: "Price", bep: "BEP", unlimited: "Unlimited", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" } },
+        zh: { title: "專業期權實驗室", strategy: "交易策略", calc: "一鍵分析策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "理論最大獲利", maxRisk: "理論最大風險", profit: "獲利區", loss: "虧損區", empty: "點擊按鈕生成損益圖表", price: "股價", bep: "兩平點", unlimited: "理論無限", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" } }
     };
 
     let currentLang = 'en';
@@ -83,6 +84,7 @@
         const cur = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
         updateFields();
+        if(document.getElementById('empty-msg').style.display === 'none') runCalculation();
     }
 
     function updateFields() {
@@ -113,27 +115,38 @@
         const v1 = parseFloat(document.getElementById('s1').value), v2 = parseFloat(document.getElementById('s2').value);
         const v3 = parseFloat(document.getElementById('s3').value), v4 = parseFloat(document.getElementById('s4').value);
         const prem = parseFloat(document.getElementById('premium').value), S = parseFloat(document.getElementById('target').value);
-        
+        const dL = i18n[currentLang];
+
+        // 計算 Summary
+        let mP = 0, mL = 0;
+        switch(sSelect) {
+            case 'long_call': mP = dL.unlimited; mL = prem * 100; break;
+            case 'short_call': mP = prem * 100; mL = dL.unlimited; break;
+            case 'bull_call': mP = (v2-v1-prem)*100; mL = prem*100; break;
+            case 'iron_condor': mP = prem*100; mL = (Math.max(v2-v1, v4-v3)-prem)*100; break;
+            case 'butterfly': mP = (v2-v1-prem)*100; mL = prem*100; break;
+            default: mP = "---"; mL = prem*100;
+        }
+        document.getElementById('res-max-profit').innerText = typeof mP === 'number' ? `$${mP.toFixed(0)}` : mP;
+        document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
+
         const xMin = S * 0.7, xMax = S * 1.3;
         let data = [];
         let beps = [];
-
         for(let i=0; i<=200; i++) {
             let p = xMin + (i * (xMax - xMin) / 200);
             let y = getP(p, sSelect, v1, v2, v3, v4, prem);
             data.push({x: p, y: y});
             if (i > 0) {
                 let prevY = data[i-1].y;
-                if ((prevY < 0 && y >= 0) || (prevY > 0 && y <= 0)) {
-                    beps.push({x: p, idx: i});
-                }
+                if ((prevY < 0 && y >= 0) || (prevY > 0 && y <= 0)) beps.push({x: p, idx: i});
             }
         }
         
-        // 預設以第一個 BEP 為動畫中心點，若無 BEP 則以 Spot 為準
         let centerIdx = beps.length > 0 ? beps[0].idx : data.findIndex(d => d.x >= S);
-        
-        document.getElementById('res-prob').innerText = beps.length > 0 ? `Detected ${beps.length} Break-even Points` : "No BEP in range";
+        if (centerIdx < 0) centerIdx = 100;
+
+        document.getElementById('res-prob').innerText = beps.length > 0 ? `Break-even at $${beps.map(b=>b.x.toFixed(1)).join(', ')}` : "No BEP in range";
         drawSVG(data, xMin, xMax, centerIdx, beps);
     }
 
@@ -143,12 +156,15 @@
         const maxY = Math.max(...data.map(d => Math.abs(d.y))) * 1.5 || 1;
         const getY = (y) => MID - (y / maxY) * (H * 0.4);
 
+        const buildPath = (arr) => {
+            if(!arr || arr.length === 0) return "";
+            return `M ${getX(arr[0].x)} ${getY(arr[0].y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
+        };
+
         const leftArr = data.slice(0, cIdx + 1).reverse();
         const rightArr = data.slice(cIdx);
-        const buildPath = (arr) => arr.length ? `M ${getX(arr.x)} ${getY(arr.y)} ` + arr.slice(1).map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ') : "";
-        
-        const fullPath = `M ${getX(data.x)} ${getY(data.y)} ` + data.map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
-        const fillD = `${fullPath} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data.x)} ${MID} Z`;
+        const fullPath = `M ${getX(data[0].x)} ${getY(data[0].y)} ` + data.map(p => `L ${getX(p.x)} ${getY(p.y)}`).join(' ');
+        const fillD = `${fullPath} L ${getX(data[data.length-1].x)} ${MID} L ${getX(data[0].x)} ${MID} Z`;
 
         svg.innerHTML = `
             <defs>
@@ -157,20 +173,16 @@
             </defs>
             <path d="${fillD}" fill="var(--success)" opacity="0.2" clip-path="url(#cp-profit)" />
             <path d="${fillD}" fill="var(--danger)" opacity="0.2" clip-path="url(#cp-loss)" />
-            
             <line x1="0" y1="${MID}" x2="${W}" y2="${MID}" stroke="#475569" stroke-width="1.5" />
-            
             <path d="${buildPath(leftArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
             <path d="${buildPath(rightArr)}" fill="none" stroke="#38bdf8" stroke-width="3" class="path-anim" />
-            
             ${beps.map(b => `
                 <g>
-                    <line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.6" />
+                    <line x1="${getX(b.x)}" y1="0" x2="${getX(b.x)}" y2="${H}" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4" opacity="0.5" />
                     <circle cx="${getX(b.x)}" cy="${MID}" r="4" fill="#fbbf24" />
                     <text x="${getX(b.x)}" y="${MID + 18}" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">${d.bep}: ${b.x.toFixed(1)}</text>
                 </g>
             `).join('')}
-
             <text x="10" y="25" fill="#4ade80" font-size="10" font-weight="900">${d.profit}</text>
             <text x="10" y="${H-15}" fill="#f87171" font-size="10" font-weight="900">${d.loss}</text>
             <line id="v-line" y1="0" y2="${H}" stroke="white" stroke-dasharray="4" style="display:none" />
