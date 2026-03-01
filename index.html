@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Options Lab | Final Corrected Version</title>
+    <title>Pro Options Lab | Precision Strategy Visualizer</title>
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
@@ -17,29 +17,32 @@
         .lang-btn { background: var(--input-bg); border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 13px; color: var(--text); transition: 0.3s; }
         .lang-btn.active { background: var(--primary) !important; color: #000 !important; font-weight: 800; }
         
-        /* 徹底解決黏在一起的問題 */
+        /* 欄位間距修正 */
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 15px; }
         .full-width { grid-column: span 3; }
         
         .field-group { display: flex; flex-direction: column; }
+        /* 預設隱藏額外欄位，防止載入閃爍 */
+        .extra-strike { display: none !important; } 
+
         label { display: flex; align-items: center; font-size: 11px; font-weight: 800; margin-bottom: 12px; color: var(--secondary); text-transform: uppercase; white-space: nowrap; }
         .op-tag { font-size: 9px; padding: 3px 8px; border-radius: 6px; margin-left: 10px; font-weight: 900; }
         .tag-buy { background: rgba(56, 189, 248, 0.15); color: var(--buy); border: 1px solid var(--buy); }
         .tag-sell { background: rgba(251, 113, 133, 0.15); color: var(--sell); border: 1px solid var(--sell); }
         
-        input, select { width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; font-size: 15px; background: var(--input-bg); color: white; outline: none; transition: 0.2s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
+        input, select { width: 100%; padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; font-size: 15px; background: var(--input-bg); color: white; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--primary); background: #3d4d63; }
         
-        button#calcBtn { width: 100%; padding: 22px; background: var(--primary); color: #000; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 35px; transition: 0.3s; box-shadow: 0 12px 24px rgba(56, 189, 248, 0.2); }
-        button#calcBtn:disabled { opacity: 0.15; cursor: not-allowed; box-shadow: none; }
+        button#calcBtn { width: 100%; padding: 22px; background: var(--primary); color: #000; border: none; border-radius: 18px; font-size: 18px; font-weight: 900; cursor: pointer; margin-top: 35px; transition: 0.3s; }
+        button#calcBtn:disabled { opacity: 0.15; cursor: not-allowed; }
         
         #summary-panel { margin-top: 35px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .data-card { background: rgba(255,255,255,0.02); padding: 22px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; text-transform: uppercase; }
-        .data-val { font-size: 22px; font-weight: 900; }
+        .data-val { font-size: 20px; font-weight: 900; }
         
         #chart-wrapper { position: relative; margin-top: 35px; background: #000; border-radius: 24px; height: 400px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 15px; border-radius: 12px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; min-width: 170px; }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 15px; border-radius: 12px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -53,9 +56,9 @@
     <div class="grid">
         <div class="full-width field-group"><label id="ui-strategy">Strategy</label><select id="strategySelect" onchange="handleStrategyChange()"></select></div>
         <div class="field-group"><label><span id="ui-s1">Strike 1</span><span id="tag-s1" class="op-tag"></span></label><input type="number" id="s1" value="100" oninput="handleInputChange()"></div>
-        <div id="boxS2" class="field-group" style="display:none;"><label><span id="ui-s2">Strike 2</span><span id="tag-s2" class="op-tag"></span></label><input type="number" id="s2" value="110" oninput="handleInputChange()"></div>
-        <div id="boxS3" class="field-group" style="display:none;"><label><span id="ui-s3">Strike 3</span><span id="tag-s3" class="op-tag"></span></label><input type="number" id="s3" value="120" oninput="handleInputChange()"></div>
-        <div id="boxS4" class="field-group" style="display:none;"><label><span id="ui-s4">Strike 4</span><span id="tag-s4" class="op-tag"></span></label><input type="number" id="s4" value="130" oninput="handleInputChange()"></div>
+        <div id="boxS2" class="field-group extra-strike"><label><span id="ui-s2">Strike 2</span><span id="tag-s2" class="op-tag"></span></label><input type="number" id="s2" value="110" oninput="handleInputChange()"></div>
+        <div id="boxS3" class="field-group extra-strike"><label><span id="ui-s3">Strike 3</span><span id="tag-s3" class="op-tag"></span></label><input type="number" id="s3" value="120" oninput="handleInputChange()"></div>
+        <div id="boxS4" class="field-group extra-strike"><label><span id="ui-s4">Strike 4</span><span id="tag-s4" class="op-tag"></span></label><input type="number" id="s4" value="130" oninput="handleInputChange()"></div>
         <div class="field-group"><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" step="0.1" value="3.5" oninput="handleInputChange()"></div>
         <div class="field-group"><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105" oninput="handleInputChange()"></div>
     </div>
@@ -77,29 +80,24 @@
     let currentLang = 'en';
     let isCalculated = false;
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        const d = i18n[lang];
-        document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
-        document.getElementById('btn-zh').className = 'lang-btn' + (lang==='zh'?' active':'');
-        ['title','strategy','s1','s2','s3','s4','premium','target','maxReward','maxRisk','probHint'].forEach(id => {
-            if(document.getElementById('ui-'+id)) document.getElementById('ui-'+id).innerText = d[id];
-        });
-        document.getElementById('calcBtn').innerText = d.calc;
-        const select = document.getElementById('strategySelect');
-        const cur = select.value || 'long_call';
-        select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
-        updateTags(); validateLogic();
-        if(isCalculated) runCalculation();
-    }
-
+    // 關鍵修正：確保欄位顯示正確
     function updateFields() {
-        const s = document.getElementById('strategySelect').value;
+        const s = document.getElementById('strategySelect').value || 'long_call';
         const boxes = ['boxS2','boxS3','boxS4'];
-        boxes.forEach(id => document.getElementById(id).style.display = 'none');
-        if(!['long_call','short_call','long_put','short_put'].includes(s)) document.getElementById('boxS2').style.display = 'flex';
-        if(['butterfly','iron_condor'].includes(s)) document.getElementById('boxS3').style.display = 'flex';
-        if(s === 'iron_condor') document.getElementById('boxS4').style.display = 'flex';
+        boxes.forEach(id => {
+            const el = document.getElementById(id);
+            el.style.setProperty('display', 'none', 'important'); 
+        });
+        
+        if(!['long_call','short_call','long_put','short_put'].includes(s)) {
+            document.getElementById('boxS2').style.setProperty('display', 'flex', 'important');
+        }
+        if(['butterfly','iron_condor'].includes(s)) {
+            document.getElementById('boxS3').style.setProperty('display', 'flex', 'important');
+        }
+        if(s === 'iron_condor') {
+            document.getElementById('boxS4').style.setProperty('display', 'flex', 'important');
+        }
     }
 
     function updateTags() {
@@ -126,13 +124,16 @@
         const s = document.getElementById('strategySelect').value;
         const v = [1,2,3,4].map(i => parseFloat(document.getElementById('s'+i).value) || 0);
         const btn = document.getElementById('calcBtn'), hint = document.getElementById('res-prob'), d = i18n[currentLang];
+        
         let valid = true;
         if (['bull_call', 'bear_put'].includes(s) && v[0] >= v[1]) valid = false;
         else if (s === 'butterfly' && (v[0] >= v[1] || v[1] >= v[2])) valid = false;
         else if (s === 'iron_condor' && (v[0] >= v[1] || v[1] >= v[2] || v[2] >= v[3])) valid = false;
         
         btn.disabled = !valid;
-        if(!isCalculated) {
+        
+        // 關鍵修正：切換策略後回到邏輯提示
+        if (!isCalculated) {
             document.getElementById('ui-probHint').innerText = d.probHint;
             hint.innerText = valid ? d.hints.ready : d.hints.err;
             hint.style.color = valid ? 'var(--primary)' : 'var(--danger)';
@@ -140,9 +141,42 @@
         return valid;
     }
 
-    function handleStrategyChange() { isCalculated = false; updateFields(); updateTags(); resetOutput(); }
-    function handleInputChange() { isCalculated = false; validateLogic(); resetOutput(); }
-    function resetOutput() { document.getElementById('res-max-profit').innerText = '--'; document.getElementById('res-max-loss').innerText = '--'; document.getElementById('mainChart').innerHTML = ''; }
+    function handleStrategyChange() { 
+        isCalculated = false; // 重置計算狀態
+        updateFields(); 
+        updateTags(); 
+        resetOutput(); 
+        validateLogic(); // 立即重新驗證邏輯顯示提示
+    }
+
+    function handleInputChange() { 
+        isCalculated = false; 
+        validateLogic(); 
+        resetOutput(); 
+    }
+
+    function resetOutput() { 
+        document.getElementById('res-max-profit').innerText = '--'; 
+        document.getElementById('res-max-loss').innerText = '--'; 
+        document.getElementById('mainChart').innerHTML = ''; 
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        const d = i18n[lang];
+        document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
+        document.getElementById('btn-zh').className = 'lang-btn' + (lang==='zh'?' active':'');
+        ['title','strategy','s1','s2','s3','s4','premium','target','maxReward','maxRisk','probHint'].forEach(id => {
+            if(document.getElementById('ui-'+id)) document.getElementById('ui-'+id).innerText = d[id];
+        });
+        document.getElementById('calcBtn').innerText = d.calc;
+        const select = document.getElementById('strategySelect');
+        const cur = select.value || 'long_call';
+        select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
+        updateTags(); 
+        validateLogic();
+        if(isCalculated) runCalculation();
+    }
 
     function getP(p, s, v, prem) {
         switch(s) {
@@ -153,9 +187,7 @@
             case 'bull_call': return (Math.max(0, p - v[0]) - Math.max(0, p - v[1])) - prem;
             case 'bear_put': return (Math.max(0, v[1] - p) - Math.max(0, v[0] - p)) - prem;
             case 'butterfly': return (Math.max(0, p - v[0]) - 2 * Math.max(0, p - v[1]) + Math.max(0, p - v[2])) - prem;
-            case 'iron_condor': 
-                // 正確鐵鷹：買 Put S1, 賣 Put S2, 賣 Call S3, 買 Call S4
-                return prem - Math.max(0, v[1] - p) + Math.max(0, v[0] - p) - Math.max(0, p - v[2]) + Math.max(0, p - v[3]);
+            case 'iron_condor': return prem - Math.max(0, v[1] - p) + Math.max(0, v[0] - p) - Math.max(0, p - v[2]) + Math.max(0, p - v[3]);
             default: return 0;
         }
     }
@@ -171,20 +203,23 @@
         if(s.includes('call')) h = d.hints.bull; else if(s.includes('put')) h = d.hints.bear;
 
         switch(s) {
-            case 'long_call': case 'long_put': mP = "Unlimited"; mL = prem * 100; break;
-            case 'short_call': case 'short_put': mP = prem * 100; mL = "Unlimited"; break;
-            case 'bull_call': case 'bear_put': mP = (v[1]-v[0]-prem)*100; mL = prem*100; break;
+            case 'long_call': case 'long_put': mP = d.unlimited; mL = prem * 100; break;
+            case 'short_call': case 'short_put': mP = prem * 100; mL = d.unlimited; break;
+            case 'bull_call': case 'bear_put': mP = (Math.abs(v[1]-v[0])-prem)*100; mL = prem*100; break;
             case 'butterfly': mP = (v[1]-v[0]-prem)*100; mL = prem*100; break;
             case 'iron_condor': mP = prem * 100; mL = (Math.max(v[1]-v[0], v[3]-v[2]) - prem) * 100; break;
         }
         document.getElementById('res-max-profit').innerText = typeof mP === 'number' ? `$${mP.toFixed(0)}` : mP;
         document.getElementById('res-max-loss').innerText = typeof mL === 'number' ? `$${mL.toFixed(0)}` : mL;
         document.getElementById('res-prob').innerText = h;
+        document.getElementById('res-prob').style.color = 'var(--primary)';
         document.getElementById('ui-probHint').innerText = d.opt[s];
 
-        let center = (s === 'iron_condor') ? (v[1]+v[2])/2 : (s==='butterfly'?v[1]:(s.includes('spread')?(v[0]+v[1])/2:v[0]));
-        const range = Math.max(Math.abs(center-v[0]), Math.abs(center-S), 50) * 1.6;
-        const xMin = center - range, xMax = center + range;
+        let center = (v[0]+(v[3]||v[2]||v[1]||v[0]))/2;
+        if(s==='butterfly') center = v[1];
+        const range = Math.max(Math.abs(center-v[0]), Math.abs(center-S), 50) * 1.8;
+        const xMin = Math.max(0, center - range), xMax = center + range;
+        
         let data = [], beps = [];
         for(let i=0; i<=250; i++) {
             let p = xMin + (i * (xMax - xMin) / 250);
@@ -216,7 +251,13 @@
         };
         svg.onmouseleave = () => { document.getElementById('chart-tooltip').style.display = 'none'; };
     }
-    window.onload = () => { updateFields(); setLanguage('en'); };
+    
+    // 初始化執行
+    updateFields();
+    window.onload = () => {
+        setLanguage('en');
+        updateFields(); 
+    };
 </script>
 </body>
 </html>
