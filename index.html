@@ -3,35 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO Primary Tags -->
-    <title>Pro Options Lab | Free Options Profit Calculator & Strategy Visualizer</title>
-    <meta name="description" content="Free professional options profit calculator. Visualize Iron Condor, Butterfly, and Spreads. Analyze max risk, reward, and break-even points instantly.">
-    <meta name="keywords" content="options profit calculator, options strategy visualizer, iron condor calculator, options trading tools, butterfly spread graph">
-    <meta name="author" content="Pro Options Lab">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Pro Options Lab | Precision Options Visualizer">
-    <meta property="og:description" content="Master your options trades with our real-time strategy visualizer. Supports complex spreads.">
-    
-    <!-- JSON-LD Structured Data for Google -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Pro Options Lab",
-      "operatingSystem": "All",
-      "applicationCategory": "FinanceApplication",
-      "description": "A professional-grade options strategy profit and loss calculator with real-time visualization.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
-
+    <title>Pro Options Lab | Free Strategy Visualizer</title>
+    <meta name="description" content="Professional options profit calculator. Visualize Iron Condor, Butterfly, and Spreads.">
     <style>
         :root { 
             --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --secondary: #94a3b8; 
@@ -45,9 +18,6 @@
         .lang-btn { background: var(--input-bg); border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-size: 13px; color: var(--text); transition: 0.3s; }
         .lang-btn.active { background: var(--primary) !important; color: #000 !important; font-weight: 800; }
         
-        h1 { font-size: 2rem; margin-bottom: 10px; }
-        .subtitle { color: var(--secondary); margin-bottom: 30px; font-size: 0.9rem; }
-
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-top: 15px; }
         .full-width { grid-column: 1 / -1; }
         
@@ -70,14 +40,15 @@
         .data-label { display: block; font-size: 10px; font-weight: 800; color: var(--secondary); margin-bottom: 10px; text-transform: uppercase; }
         .data-val { font-size: 20px; font-weight: 900; }
         
-        .ad-container { grid-column: span 3; background: #1a2235; height: 90px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 12px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 20px; overflow: hidden; }
+        /* 廣告位置優化：設定最小高度防止版面跳動 (SEO CLS 優化) */
+        .ad-container { grid-column: span 3; background: #1a2235; min-height: 90px; border-radius: 15px; display: flex; align-items: center; justify-content: center; color: var(--secondary); font-size: 12px; border: 1px dashed rgba(255,255,255,0.1); margin-top: 20px; }
 
         #chart-wrapper { position: relative; margin-top: 35px; background: #000; border-radius: 24px; height: 400px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
         .tooltip { position: absolute; background: rgba(15, 23, 42, 0.98); padding: 15px; border-radius: 12px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
 
-        /* SEO Content Section */
-        .seo-content { max-width: 1000px; margin-top: 50px; color: var(--secondary); line-height: 1.6; font-size: 0.95rem; }
-        .seo-content h2 { color: var(--text); border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .seo-content { max-width: 1000px; margin-top: 50px; color: var(--secondary); line-height: 1.8; font-size: 0.95rem; padding-bottom: 100px; }
+        .seo-content h2 { color: var(--text); border-bottom: 1px solid #334155; padding-bottom: 10px; margin-top: 30px; }
+        .seo-content h4 { color: var(--primary); margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -87,107 +58,59 @@
         <button id="btn-en" class="lang-btn" onclick="setLanguage('en')">English</button>
         <button id="btn-zh" class="lang-btn" onclick="setLanguage('zh')">中文</button>
     </div>
-    
-    <header>
-        <h1 id="ui-title">Pro Options Lab</h1>
-        <p class="subtitle">Advanced Options Profit Calculator & Strategy Visualizer</p>
-    </header>
-
+    <h1 id="ui-title">Pro Options Lab</h1>
     <div class="grid">
-        <div class="full-width field-group">
-            <label id="ui-strategy">Strategy Selection</label>
-            <select id="strategySelect" onchange="handleStrategyChange()"></select>
-        </div>
+        <div class="full-width field-group"><label id="ui-strategy">Strategy</label><select id="strategySelect" onchange="handleStrategyChange()"></select></div>
         <div class="field-group"><label><span id="ui-s1">Strike 1</span><span id="tag-s1" class="op-tag"></span></label><input type="number" id="s1" value="100" oninput="handleInputChange()"></div>
         <div id="boxS2" class="field-group extra-strike"><label><span id="ui-s2">Strike 2</span><span id="tag-s2" class="op-tag"></span></label><input type="number" id="s2" value="110" oninput="handleInputChange()"></div>
         <div id="boxS3" class="field-group extra-strike"><label><span id="ui-s3">Strike 3</span><span id="tag-s3" class="op-tag"></span></label><input type="number" id="s3" value="120" oninput="handleInputChange()"></div>
         <div id="boxS4" class="field-group extra-strike"><label><span id="ui-s4">Strike 4</span><span id="tag-s4" class="op-tag"></span></label><input type="number" id="s4" value="130" oninput="handleInputChange()"></div>
-        <div class="field-group"><label id="ui-premium">Net Premium ($)</label><input type="number" id="premium" step="0.1" value="3.5" oninput="handleInputChange()"></div>
-        <div class="field-group"><label id="ui-target">Underlying Spot ($)</label><input type="number" id="target" value="105" oninput="handleInputChange()"></div>
+        <div class="field-group"><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" step="0.1" value="3.5" oninput="handleInputChange()"></div>
+        <div class="field-group"><label id="ui-target">Spot ($)</label><input type="number" id="target" value="105" oninput="handleInputChange()"></div>
     </div>
-
-    <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY P/L</button>
-    
-    <section id="summary-panel">
+    <button id="calcBtn" onclick="runCalculation()">ANALYZE STRATEGY</button>
+    <div id="summary-panel">
         <div class="data-card"><span class="data-label" id="ui-maxReward">Max Profit</span><span id="res-max-profit" class="data-val" style="color:var(--success)">--</span></div>
         <div class="data-card"><span class="data-label" id="ui-maxRisk">Max Risk</span><span id="res-max-loss" class="data-val" style="color:var(--danger)">--</span></div>
-        <div class="data-card"><span class="data-label" id="ui-probHint">Strategy Info</span><span id="res-prob" class="data-val" style="color:var(--primary); font-size:12px;">--</span></div>
-        
-        <!-- Google AdSense Container -->
-        <div class="ad-container" id="ad-slot">
-            <!-- Replace this with your Google AdSense Code -->
-            <p>Advertisement Placeholder</p>
-        </div>
-    </section>
-
-    <div id="chart-wrapper">
-        <div id="chart-tooltip" class="tooltip"></div>
-        <svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="none"></svg>
+        <div class="data-card"><span class="data-label" id="ui-probHint">Logic Hint</span><span id="res-prob" class="data-val" style="color:var(--primary); font-size:12px;">--</span></div>
+        <div class="ad-container" id="ad-slot">ADVERTISEMENT SLOT</div>
     </div>
+    <div id="chart-wrapper"><div id="chart-tooltip" class="tooltip"></div><svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="none"></svg></div>
 </main>
 
-<article class="seo-content">
-    <h2>Mastering Your Options Trading with Visual Analysis</h2>
-    <p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk before entering a trade. Visualizing your potential profit and loss (P/L) allows you to understand exactly how market movements will impact your portfolio. At <strong>Pro Options Lab</strong>, we simplify complex derivatives into interactive graphs.</p>
-
-    <h3>Popular Strategies Explained</h3>
-    
-    <div style="margin-top:20px;"
-
->
-        <h4>1. The Iron Condor Strategy</h4>
-        <p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility in the underlying stock. It involves selling a bear call spread and a bull put spread simultaneously. Our visualizer helps you identify the "Profit Zone" between your two short strikes and calculates your break-even points automatically.</p>
-    </div>
-
-    <div style="margin-top:20px;">
-        <h4>2. Butterfly Spread Visualization</h4>
-        <p>A <strong>Butterfly Spread</strong> is a limited-risk, non-directional strategy that combines bull and bear spreads. Traders use our tool to pinpoint the peak profit potential, which occurs when the stock price stays exactly at the middle strike price upon expiration.</p>
-    </div>
-
-    <div style="margin-top:20px;">
-        <h4>3. Vertical Spreads (Bull Call & Bear Put)</h4>
-        <p>For directional traders, <strong>Bull Call Spreads</strong> and <strong>Bear Put Spreads</strong> are essential for reducing the cost of entry. By visualizing these spreads, you can clearly see the offset between the premium paid and the premium received, defining your absolute <em>Maximum Risk</em> and <em>Maximum Reward</em>.</p>
-    </div>
-
-    <h3 style="margin-top:30px;">Why Use a P/L Graph?</h3>
-    <ul>
-        <li><strong>Risk Management:</strong> Know your maximum potential loss before you click "trade".</li>
-        <li><strong>Break-Even Points:</strong> Identify the exact stock price needed to start profiting.</li>
-        <li><strong>Strategic Planning:</strong> Compare different strike prices to find the optimal risk-to-reward ratio for your market outlook.</li>
-    </ul>
-    
-    <p style="font-size: 0.8rem; margin-top: 40px; border-top: 1px solid #334155; padding-top: 10px;">
-        <em>Disclaimer: Options trading involves significant risk and is not suitable for all investors. The calculations provided by Pro Options Lab are for educational purposes only and do not constitute financial advice.</em>
-    </p>
-</article>
+<!-- 動態 SEO 教學區塊 -->
+<article id="seo-article" class="seo-content"></article>
 
 <script>
-    // [此處貼入先前已修正過的所有 JavaScript 邏輯，確保語系預設為 'en']
     const i18n = {
-        en: { title: "Pro Options Lab", strategy: "Strategy", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Profit", maxRisk: "Max Risk", probHint: "Logic Hint", calc: "ANALYZE STRATEGY", price: "PRICE", pl: "EST. P/L", bep: "BEP", buy: "BUY", sell: "SELL", low: "Low", mid: "Mid", high: "High", call: "CALL", put: "PUT", unlimited: "Unlimited", opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" }, hints: { ready: "Ready to Analyze", err: "Logic Error!", bull: "Bullish", bear: "Bearish", neut: "Neutral", vol: "Vol Play" } },
-        zh: { title: "專業期權實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "目前股價", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "一鍵分析策略", price: "目前價格", pl: "預計損益", bep: "損益點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制", opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" }, hints: { ready: "設定正確，請分析", err: "順序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "多波動率" } }
+        en: { 
+            title: "Pro Options Lab", strategy: "Strategy", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Profit", maxRisk: "Max Risk", probHint: "Logic Hint", calc: "ANALYZE STRATEGY", price: "PRICE", pl: "EST. P/L", bep: "BEP", buy: "BUY", sell: "SELL", low: "Low", mid: "Mid", high: "High", call: "CALL", put: "PUT", unlimited: "Unlimited",
+            opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" },
+            hints: { ready: "Ready to Analyze", err: "Logic Error!", bull: "Bullish", bear: "Bearish", neut: "Neutral", vol: "Vol Play" },
+            seo: `<h2>Mastering Your Options Trading with Visual Analysis</h2><p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk before entering a trade. Visualizing your potential profit and loss (P/L) allows you to understand exactly how market movements will impact your portfolio.</p><h4>1. The Iron Condor Strategy</h4><p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility. It involves selling a bear call spread and a bull put spread simultaneously.</p><h4>2. Butterfly Spread Visualization</h4><p>A <strong>Butterfly Spread</strong> is a limited-risk strategy that combines bull and bear spreads. Use our tool to pinpoint the peak profit potential.</p>`
+        },
+        zh: { 
+            title: "專業期權分析實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "一鍵分析策略損益", price: "標的價格", pl: "預計損益", bep: "損益平衡點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制",
+            opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" },
+            hints: { ready: "設定正確，請點擊分析", err: "價格排序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略", vol: "做多波動率" },
+            seo: `<h2>透過視覺化圖表掌握您的選擇權交易</h2><p>在進入交易前，使用<strong>選擇權損益計算機</strong>是管理風險最有效的方式。視覺化您的潛在獲利與虧損 (P/L)，能讓您精確理解市場波動對部位的影響。</p><h4>1. 鐵鷹策略 (Iron Condor)</h4><p><strong>鐵鷹策略</strong>是一種中性策略，旨在從低波動率中獲利。它同時包含了賣出看漲價差與賣出看跌價差。</p><h4>2. 蝴蝶價差視覺化 (Butterfly Spread)</h4><p><strong>蝴蝶價差</strong>是一種風險有限的策略，結合了牛市與熊市價差。使用我們的工具來精確鎖定最大獲利點。</p>`
+        }
     };
 
     let currentLang = 'en';
     let isCalculated = false;
 
-    function hideTooltip() {
-        const tt = document.getElementById('chart-tooltip');
-        if(tt) tt.style.display = 'none';
-    }
-
+    function hideTooltip() { const tt = document.getElementById('chart-tooltip'); if(tt) tt.style.display = 'none'; }
     function updateFields() {
         const s = document.getElementById('strategySelect').value || 'long_call';
-        const boxes = ['boxS2','boxS3','boxS4'];
-        boxes.forEach(id => document.getElementById(id).style.display = 'none');
+        ['boxS2','boxS3','boxS4'].forEach(id => document.getElementById(id).style.display = 'none');
         if(!['long_call','short_call','long_put','short_put'].includes(s)) document.getElementById('boxS2').style.display = 'flex';
         if(['butterfly','iron_condor'].includes(s)) document.getElementById('boxS3').style.display = 'flex';
         if(s === 'iron_condor') document.getElementById('boxS4').style.display = 'flex';
     }
 
     function updateTags() {
-        const s = document.getElementById('strategySelect').value;
-        const d = i18n[currentLang];
+        const s = document.getElementById('strategySelect').value, d = i18n[currentLang];
         ['s1', 's2', 's3', 's4'].forEach(id => { const el = document.getElementById('tag-' + id); if(el) { el.innerText = ''; el.className = 'op-tag'; }});
         const set = (id, act, typ, pos) => {
             const el = document.getElementById('tag-' + id);
@@ -222,19 +145,9 @@
         return valid;
     }
 
-    function handleStrategyChange() { 
-        isCalculated = false; hideTooltip(); updateFields(); updateTags(); resetOutput(); validateLogic(); 
-    }
-
-    function handleInputChange() { 
-        isCalculated = false; hideTooltip(); validateLogic(); resetOutput(); 
-    }
-
-    function resetOutput() { 
-        document.getElementById('res-max-profit').innerText = '--'; 
-        document.getElementById('res-max-loss').innerText = '--'; 
-        document.getElementById('mainChart').innerHTML = ''; 
-    }
+    function handleStrategyChange() { isCalculated = false; hideTooltip(); updateFields(); updateTags(); resetOutput(); validateLogic(); }
+    function handleInputChange() { isCalculated = false; hideTooltip(); validateLogic(); resetOutput(); }
+    function resetOutput() { document.getElementById('res-max-profit').innerText = '--'; document.getElementById('res-max-loss').innerText = '--'; document.getElementById('mainChart').innerHTML = ''; }
 
     function getP(p, s, v, prem) {
         switch(s) {
@@ -246,9 +159,9 @@
             case 'bear_put': return (Math.max(0, v[1] - p) - Math.max(0, v[0] - p)) - prem;
             case 'butterfly': return (Math.max(0, p - v[0]) - 2 * Math.max(0, p - v[1]) + Math.max(0, p - v[2])) - prem;
             case 'iron_condor': 
-                const putProfit = Math.max(0, v[1] - p) - Math.max(0, v[0] - p);
-                const callProfit = Math.max(0, p - v[2]) - Math.max(0, p - v[3]);
-                return prem - (putProfit + callProfit);
+                const putSpread = Math.max(0, v[1] - p) - Math.max(0, v[0] - p);
+                const callSpread = Math.max(0, p - v[2]) - Math.max(0, p - v[3]);
+                return prem - (putSpread + callSpread);
             default: return 0;
         }
     }
@@ -301,13 +214,10 @@
         `;
         svg.onmousemove = (e) => {
             if(!isCalculated) return;
-            const rect = svg.getBoundingClientRect();
-            const mouseX = (e.clientX - rect.left) * (W / rect.width);
-            const item = data.reduce((a, b) => Math.abs(getX(b.x)-mouseX) < Math.abs(getX(a.x)-mouseX) ? b : a);
-            const tt = document.getElementById('chart-tooltip');
-            tt.style.display = 'block';
-            let tx = e.clientX - rect.left + 20;
-            if (tx + 180 > rect.width) tx = e.clientX - rect.left - 190;
+            const rect = svg.getBoundingClientRect(), mx = (e.clientX - rect.left) * (W / rect.width), tt = document.getElementById('chart-tooltip');
+            const item = data.reduce((a, b) => Math.abs(getX(b.x)-mx) < Math.abs(getX(a.x)-mx) ? b : a);
+            tt.style.display = 'block'; 
+            let tx = e.clientX - rect.left + 20; if (tx + 180 > rect.width) tx = e.clientX - rect.left - 190;
             tt.style.left = tx + 'px'; tt.style.top = (e.clientY - rect.top - 70) + 'px';
             tt.innerHTML = `<div style="color:var(--secondary); font-size:10px;">${d.price}</div><b style="font-size:15px;">$${item.x.toFixed(2)}</b><hr style="border:0; border-top:1px solid #334155; margin:8px 0;"><div style="color:var(--secondary); font-size:10px;">${d.pl}</div><b style="color:${item.y>=0?'var(--success)':'var(--danger)'}; font-size:15px;">$${(item.y*100).toFixed(0)}</b>`;
         };
@@ -315,14 +225,14 @@
     }
 
     function setLanguage(lang) {
-        currentLang = lang;
-        const d = i18n[lang];
+        currentLang = lang; const d = i18n[lang];
         document.getElementById('btn-en').className = 'lang-btn' + (lang==='en'?' active':'');
         document.getElementById('btn-zh').className = 'lang-btn' + (lang==='zh'?' active':'');
         ['title','strategy','s1','s2','s3','s4','premium','target','maxReward','maxRisk','probHint'].forEach(id => {
             if(document.getElementById('ui-'+id)) document.getElementById('ui-'+id).innerText = d[id];
         });
         document.getElementById('calcBtn').innerText = d.calc;
+        document.getElementById('seo-article').innerHTML = d.seo; // 更新 SEO 文案
         const select = document.getElementById('strategySelect');
         const cur = select.value || 'long_call';
         select.innerHTML = Object.entries(d.opt).map(([k,v]) => `<option value="${k}" ${k===cur?'selected':''}>${v}</option>`).join('');
