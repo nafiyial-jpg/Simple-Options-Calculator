@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="tab-title">Pro Options Lab | Free Options Profit Calculator</title>
     
-    <!-- SEO & Schema -->
+    <!-- SEO Meta & Schema -->
+    <meta name="description" content="Professional options profit calculator. Visualizing Iron Condor, Butterfly, and Vertical spreads with interactive P/L graphs.">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -27,9 +28,10 @@
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; flex-direction: column; align-items: center; }
         .container { background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); width: 100%; max-width: 1200px; border: 1px solid rgba(255,255,255,0.1); }
         
+        /* Dashboard Layout */
         .dashboard { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 992px) {
-            .dashboard { grid-template-columns: 320px 1fr; align-items: start; }
+            .dashboard { grid-template-columns: 340px 1fr; align-items: start; }
             .sticky-side { position: sticky; top: 15px; }
         }
 
@@ -42,31 +44,35 @@
         h1 { font-size: 1.5rem; margin: 0 0 15px 0; color: var(--primary); }
         .ad-slim { min-height: 90px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--secondary); border: 1px dashed rgba(255,255,255,0.1); }
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* 欄位對齊修正核心 CSS */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: flex-end; }
         .full-width { grid-column: 1 / -1; }
-        label { display: flex; align-items: center; font-size: 10px; font-weight: 800; margin-bottom: 6px; color: var(--secondary); text-transform: uppercase; }
-        .op-tag { font-size: 8px; padding: 1px 6px; border-radius: 4px; margin-left: auto; }
+        .field-group { display: flex; flex-direction: column; width: 100%; }
+        
+        label { display: flex; align-items: center; font-size: 10px; font-weight: 800; min-height: 22px; margin-bottom: 6px; color: var(--secondary); text-transform: uppercase; }
+        .op-tag { font-size: 8px; padding: 1px 6px; border-radius: 4px; margin-left: auto; white-space: nowrap; }
         .tag-buy { background: rgba(56, 189, 248, 0.15); color: var(--buy); border: 1px solid var(--buy); }
         .tag-sell { background: rgba(251, 113, 133, 0.15); color: var(--sell); border: 1px solid var(--sell); }
 
         input, select { width: 100%; height: 42px; padding: 0 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 14px; background: var(--input-bg); color: white; outline: none; }
-        button#calcBtn { width: 100%; padding: 15px; background: var(--primary); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-        button#calcBtn:disabled { opacity: 0.3; }
+        button#calcBtn { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; margin-top: 20px; transition: 0.2s; }
+        button#calcBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
         #summary-panel { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .data-card { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
         .data-card.full { grid-column: 1 / -1; }
-        .data-label { display: block; font-size: 9px; font-weight: 800; color: var(--secondary); margin-bottom: 4px; }
         .data-val { font-size: 18px; font-weight: 900; }
 
-        #chart-wrapper { position: relative; background: #000; border-radius: 20px; height: 450px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 20px; }
-        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.95); padding: 10px; border-radius: 8px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; display: none; white-space: nowrap; }
+        #chart-wrapper { position: relative; background: #000; border-radius: 20px; height: 420px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 20px; }
+        .tooltip { position: absolute; background: rgba(15, 23, 42, 0.95); padding: 12px; border-radius: 10px; font-size: 12px; color: white; pointer-events: none; border: 1px solid var(--primary); z-index: 1000; display: none; white-space: nowrap; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
         
-        /* SEO Style Fix */
+        /* SEO Style: 策略標題藍色，內文粗體白色 */
         .seo-content { margin-top: 40px; color: var(--secondary); line-height: 1.6; font-size: 0.9rem; text-align: left; }
         .seo-content h2 { color: var(--text); border-bottom: 1px solid #334155; padding-bottom: 8px; }
-        .seo-content h4 { color: var(--primary); margin: 15px 0 5px 0; }
-        .seo-content strong { color: var(--primary); font-weight: 800; } /* 修正藍色粗體 */
+        .seo-content h4 { margin: 20px 0 8px 0; }
+        .seo-content h4 strong { color: var(--primary); font-weight: 800; } 
+        .seo-content strong { color: var(--text); font-weight: 700; } 
+        
         .disclaimer { font-size: 0.75rem; margin-top: 30px; opacity: 0.5; border-top: 1px solid #334155; padding-top: 15px; }
     </style>
 </head>
@@ -87,13 +93,34 @@
         <div class="sticky-side">
             <h1 id="ui-title">Pro Options Lab</h1>
             <div class="grid">
-                <div class="full-width field-group"><label id="ui-strategy">Strategy</label><select id="strategySelect" onchange="handleStrategyChange()"></select></div>
-                <div class="field-group"><label><span id="ui-s1">Strike 1</span><span id="tag-s1" class="op-tag"></span></label><input type="number" id="s1" value="95" oninput="handleInputChange()"></div>
-                <div id="boxS2" class="field-group"><label><span id="ui-s2">Strike 2</span><span id="tag-s2" class="op-tag"></span></label><input type="number" id="s2" value="100" oninput="handleInputChange()"></div>
-                <div id="boxS3" class="field-group"><label><span id="ui-s3">Strike 3</span><span id="tag-s3" class="op-tag"></span></label><input type="number" id="s3" value="110" oninput="handleInputChange()"></div>
-                <div id="boxS4" class="field-group"><label><span id="ui-s4">Strike 4</span><span id="tag-s4" class="op-tag"></span></label><input type="number" id="s4" value="115" oninput="handleInputChange()"></div>
-                <div class="field-group"><label id="ui-premium">Net Prem ($)</label><input type="number" id="premium" step="0.1" value="2.0" oninput="handleInputChange()"></div>
-                <div class="field-group"><label id="ui-target">Spot Price ($)</label><input type="number" id="target" value="105" oninput="handleInputChange()"></div>
+                <div class="full-width field-group">
+                    <label id="ui-strategy">Strategy</label>
+                    <select id="strategySelect" onchange="handleStrategyChange()"></select>
+                </div>
+                <div class="field-group">
+                    <label><span id="ui-s1">Strike 1</span><span id="tag-s1" class="op-tag"></span></label>
+                    <input type="number" id="s1" value="95" oninput="handleInputChange()">
+                </div>
+                <div id="boxS2" class="field-group">
+                    <label><span id="ui-s2">Strike 2</span><span id="tag-s2" class="op-tag"></span></label>
+                    <input type="number" id="s2" value="100" oninput="handleInputChange()">
+                </div>
+                <div id="boxS3" class="field-group">
+                    <label><span id="ui-s3">Strike 3</span><span id="tag-s3" class="op-tag"></span></label>
+                    <input type="number" id="s3" value="110" oninput="handleInputChange()">
+                </div>
+                <div id="boxS4" class="field-group">
+                    <label><span id="ui-s4">Strike 4</span><span id="tag-s4" class="op-tag"></span></label>
+                    <input type="number" id="s4" value="115" oninput="handleInputChange()">
+                </div>
+                <div class="field-group">
+                    <label id="ui-premium">Net Prem ($)</label>
+                    <input type="number" id="premium" step="0.1" value="2.0" oninput="handleInputChange()">
+                </div>
+                <div class="field-group">
+                    <label id="ui-target">Spot Price ($)</label>
+                    <input type="number" id="target" value="105" oninput="handleInputChange()">
+                </div>
             </div>
             <button id="calcBtn" onclick="runCalculation()">ANALYZE</button>
 
@@ -105,7 +132,10 @@
         </div>
 
         <div class="visual-side">
-            <div id="chart-wrapper"><div id="chart-tooltip" class="tooltip"></div><svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg></div>
+            <div id="chart-wrapper">
+                <div id="chart-tooltip" class="tooltip"></div>
+                <svg id="mainChart" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet"></svg>
+            </div>
             <div class="ad-slim" style="min-height: 250px;">ADVERTISEMENT - RECTANGLE AD</div>
         </div>
     </div>
@@ -120,13 +150,29 @@ const i18n = {
         title: "Pro Options Lab", strategy: "Strategy", s1: "Strike 1", s2: "Strike 2", s3: "Strike 3", s4: "Strike 4", premium: "Net Prem ($)", target: "Spot ($)", maxReward: "Max Profit", maxRisk: "Max Risk", probHint: "Logic Hint", calc: "ANALYZE STRATEGY", price: "PRICE", pl: "EST. P/L", bep: "BEP", buy: "BUY", sell: "SELL", low: "Low", mid: "Mid", high: "High", call: "CALL", put: "PUT", unlimited: "Unlimited", share: "Copy Link", copied: "Copied!",
         opt: { long_call: "Long Call", short_call: "Short Call", long_put: "Long Put", short_put: "Short Put", bull_call: "Bull Call Spread", bear_put: "Bear Put Spread", butterfly: "Butterfly Spread", iron_condor: "Iron Condor" },
         hints: { ready: "Ready to Analyze", err: "Logic Error!", bull: "Bullish", bear: "Bearish", neut: "Neutral" },
-        seo: `<h2>Mastering Options Trading with Visual P/L Analysis</h2><p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk. Pro Options Lab simplifies complex derivatives into interactive graphs.</p><h3>Strategies Explained</h3><h4>1. Iron Condor</h4><p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility. It involves selling a bear call spread and a bull put spread simultaneously.</p><h4>2. Butterfly Spread</h4><p>A <strong>Butterfly Spread</strong> is a limited-risk strategy. Peak profit occurs when the stock price equals the middle strike at expiry.</p><h4>3. Vertical Spreads (Bull/Bear)</h4><p>Define your absolute Maximum Risk and Reward by visualizing the offset between premiums. These spreads limit your downside while defining clear profit targets.</p>`
+        seo: `<h2>Mastering Options Trading with Visual P/L Analysis</h2>
+              <p>Using an <strong>Options Profit Calculator</strong> is the most effective way to manage risk. Pro Options Lab simplifies complex derivatives into interactive graphs.</p>
+              <h3>Popular Strategies Explained</h3>
+              <h4>1. <strong>Iron Condor</strong></h4>
+              <p>The <strong>Iron Condor</strong> is a neutral strategy designed to profit from low volatility. It involves selling a bear call spread and a bull put spread simultaneously.</p>
+              <h4>2. <strong>Butterfly Spread</strong></h4>
+              <p>A <strong>Butterfly Spread</strong> is a limited-risk strategy. Peak profit occurs when the stock price equals the middle strike at expiry.</p>
+              <h4>3. <strong>Vertical Spreads (Bull/Bear)</strong></h4>
+              <p>Define your absolute Maximum Risk and Reward by visualizing the offset between premiums. These spreads limit your downside while defining clear profit targets.</p>`
     },
     zh: {
-        title: "專業期權實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "分析損益", price: "標的價格", pl: "預計損益", bep: "損益點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制", share: "複製連結", copied: "已複製！",
+        title: "專業期權實驗室", strategy: "交易策略", s1: "履約價 1", s2: "履約價 2", s3: "履約價 3", s4: "履約價 4", premium: "權利金淨額", target: "標的價格", maxReward: "最大獲利", maxRisk: "最大風險", probHint: "邏輯提示", calc: "損益分析", price: "標的價格", pl: "預計損益", bep: "損益點", buy: "買入", sell: "賣出", low: "低", mid: "中", high: "高", call: "買權", put: "賣權", unlimited: "無限制", share: "複製連結", copied: "已複製！",
         opt: { long_call: "買入買權", short_call: "賣出買權", long_put: "買入賣權", short_put: "賣出賣權", bull_call: "牛市買權價差", bear_put: "熊市賣權價差", butterfly: "蝴蝶價差", iron_condor: "鐵鷹策略" },
         hints: { ready: "設定正確", err: "順序錯誤！", bull: "看多策略", bear: "看空策略", neut: "中性策略" },
-        seo: `<h2>透過視覺化損益圖表掌握期權交易</h2><p><strong>期權損益計算機</strong>是管理風險最有效的方式。Pro Options Lab 將衍生性商品轉化為損益圖表，幫助您預測各種市場情境。</p><h3>熱門策略解析</h3><h4>1. 鐵鷹策略 (Iron Condor)</h4><p>旨在從低波動中獲利的中性策略。透過同時賣出一個熊市看漲價差與一個牛市看跌價差，目標是讓股價維持在區間內。</p><h4>2. 蝴蝶價差 (Butterfly Spread)</h4><p>風險有限的中性策略。當標的資產在到期時的價格等於中間履約價時，該策略將達到最大獲利值。</p><h4>3. 垂直價差 (Vertical Spreads - 牛市/熊市價差)</h4><p>透過視覺化買入與賣出期權之間的權利金差額，鎖定明確的獲利與風險目標。<strong>垂直價差</strong>能在限制下檔風險的同時，定義清晰的獲利目標。</p>`
+        seo: `<h2>透過視覺化損益圖表掌握期權交易</h2>
+              <p><strong>期權損益計算機</strong>是管理風險最有效的方式。Pro Options Lab 將衍生性商品轉化為損益圖表，幫助您預測各種市場情境。</p>
+              <h3>熱門策略解析</h3>
+              <h4>1. <strong>鐵鷹策略 (Iron Condor)</strong></h4>
+              <p>旨在從低波動中獲利的中性策略。透過同時賣出一個熊市看漲價差與一個牛市看跌價差，目標是讓股價維持在區間內。</p>
+              <h4>2. <strong>蝴蝶價差 (Butterfly Spread)</strong></h4>
+              <p>風險有限的中性策略。當標的資產在到期時的價格等於中間履約價時，該策略將達到最大獲利值。</p>
+              <h4>3. <strong>垂直價差 (Vertical Spreads - 牛市/熊市價差)</strong></h4>
+              <p>透過視覺化買入與賣出期權之間的權利金差額，鎖定明確的獲利與風險目標。<strong>垂直價差</strong>能在限制下檔風險的同時，定義清晰的獲利目標。</p>`
     }
 };
 
@@ -264,9 +310,9 @@ function drawSVG(data, xMin, xMax, spot, beps) {
         const mx = (e.clientX - rect.left) * (W / rect.width);
         const item = globalData.reduce((a, b) => Math.abs(getX(b.x) - mx) < Math.abs(getX(a.x) - mx) ? b : a);
         tt.style.display = 'block';
-        let posX = e.clientX - rect.left + 15, ttW = 150;
-        if (posX + ttW > rect.width) posX = e.clientX - rect.left - ttW - 15;
-        tt.style.left = posX + 'px'; tt.style.top = (e.clientY - rect.top - 60) + 'px';
+        let posX = e.clientX - rect.left + 20, ttW = 160;
+        if (posX + ttW > rect.width) posX = e.clientX - rect.left - ttW - 20;
+        tt.style.left = posX + 'px'; tt.style.top = (e.clientY - rect.top - 65) + 'px';
         tt.innerHTML = `${d.price}: $${item.x.toFixed(2)}<br>${d.pl}: <span style="color:${item.y>=0?'var(--success)':'var(--danger)'}; font-weight:900">$${(item.y*100).toFixed(0)}</span>`;
     };
     svg.onmouseleave = () => document.getElementById('chart-tooltip').style.display='none';
@@ -274,7 +320,10 @@ function drawSVG(data, xMin, xMax, spot, beps) {
 
 function copyShareLink() { 
     const p = new URLSearchParams(); p.set('lang', currentLang); p.set('s', document.getElementById('strategySelect').value);
-    [1,2,3,4].forEach(i => p.set('s'+i, document.getElementById('s'+i).value));
+    [1,2,3,4].forEach(i => {
+        const val = document.getElementById('s'+i).value;
+        if(val) p.set('s'+i, val);
+    });
     ['premium','target'].forEach(id => p.set(id, document.getElementById(id).value));
     navigator.clipboard.writeText(window.location.origin + window.location.pathname + '?' + p.toString());
     const btn = document.querySelector('#shareBtn span'); btn.innerText = i18n[currentLang].copied; setTimeout(()=>btn.innerText=i18n[currentLang].share, 2000);
@@ -286,7 +335,8 @@ window.onload = () => {
     setLanguage(currentLang);
     if(params.has('s')) {
         document.getElementById('strategySelect').value = params.get('s');
-        ['s1','s2','s3','s4','premium','target'].forEach(id => { if(params.has(id)) document.getElementById(id).value = params.get(id); });
+        [1,2,3,4].forEach(i => { if(params.has('s'+i)) document.getElementById('s'+i).value = params.get('s'+i); });
+        ['premium','target'].forEach(id => { if(params.has(id)) document.getElementById(id).value = params.get(id); });
         updateFields(); updateTags(); runCalculation();
     } else { updateFields(); updateTags(); }
 };
